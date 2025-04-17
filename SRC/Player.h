@@ -40,6 +40,14 @@ public:
 		}
 	}
 
+	//me
+	//adding an increase lives function
+	void IncreaseLives()
+	{
+		mLives++;
+	}
+
+
 private:
 	int mLives;
 
