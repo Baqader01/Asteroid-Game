@@ -9,3 +9,7 @@ ExtraLifePowerUp::ExtraLifePowerUp()
     mBoundingShape = make_shared<BoundingSphere>(this, 3.0f);  
     // Set visual properties 
 }
+
+void ExtraLifePowerUp::ApplyEffect(Player& player) {
+        player.IncreaseLives();
+}

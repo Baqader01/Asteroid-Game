@@ -13,6 +13,13 @@ typedef list< weak_ptr< GameObject > > WeakGameObjectList;
 // Define a type of map to hold lists of collisions
 typedef map< shared_ptr<GameObject>, GameObjectList > CollisionMap;
 
+//added a game state
+enum class GameState {
+	MENU,
+	PLAYING,
+	GAME_OVER
+};
+
 class GameWorld
 {
 public:
@@ -48,6 +55,13 @@ public:
 
 	void WrapXY(float &x, float &y);
 
+	//adding a getter and setter for state
+	void SetState(GameState state) { mCurrentState = state; }
+	GameState GetState() const { return mCurrentState; }
+
+	void RenderMenu();
+
+
 protected:
 	void UpdateObjects(int t);
 	void UpdateCollisions(int t);
@@ -69,6 +83,10 @@ protected:
 	int mWidth;
 	// The height of the world
 	int mHeight;
+
+	//starting on main menu
+	GameState mCurrentState = GameState::MENU;
+	GameObjectList mMenuObjects; // Separate list for menu items
 };
 
 #endif

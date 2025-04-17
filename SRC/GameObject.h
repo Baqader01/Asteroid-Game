@@ -32,18 +32,21 @@ public:
 	void SetWorld(GameWorld *w) { mWorld = w; }
 	GameWorld* GetWorld() { return mWorld; }
 
+	// speed
 	void SetAngle(GLfloat a) { mAngle = a; }
 	void SetRotation(GLfloat r) { mRotation = r; }
 	void SetPosition(GLVector3f p) { mPosition = p; }
 	void SetVelocity(GLVector3f v) { mVelocity = v; }
 	void SetAcceleration(GLVector3f a) { mAcceleration = a; }
 	
+
 	void AddAngle(GLfloat a) { mAngle += a; if (mAngle < 0) mAngle += 360; if (mAngle > 360) mAngle -= 360; }
 	void AddRotation(GLfloat r) { mRotation += r; }
 	void AddPosition(GLVector3f p) { mPosition += p; }
 	void AddVelocity(GLVector3f v) { mVelocity += v; }
 	void AddAcceleration(GLVector3f a) { mAcceleration += a; }
 
+	// angles
 	GLfloat GetAngle() { return mAngle; }
 	GLfloat GetRotation() { return mRotation; }
 	GLVector3f GetPosition() { return mPosition; }

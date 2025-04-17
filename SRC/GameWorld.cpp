@@ -19,8 +19,13 @@ GameWorld::~GameWorld(void)
 /** Update the world. */
 void GameWorld::Update(int t)
 {
-	UpdateObjects(t);
-	UpdateCollisions(t);
+	if (mCurrentState == GameState::MENU) {
+		/*UpdateMenu(t);*/
+	}
+	else {
+		UpdateObjects(t);
+		UpdateCollisions(t);
+	}
 
 	// Remove objects flagged for removal
 	WeakGameObjectList::iterator it = mGameObjectsToRemove.begin();
@@ -37,24 +42,29 @@ void GameWorld::Update(int t)
 /** Render the world by rendering all of its objects. */
 void GameWorld::Render(void)
 {
-	// Update the projection matrix
-	glMatrixMode(GL_PROJECTION);
-	// Store the current projection matrix
-	glPushMatrix();
-	// Initialize the projection matrix to the identity matrix
-	glLoadIdentity();
-	// Set orthographic projection to include the world
-	glOrtho(-mWidth/2, mWidth/2, -mHeight/2, mHeight/2, -100, 100);
+	if (mCurrentState == GameState::MENU) {
+		//RenderMenu();
+	}
+	else {
+		// Update the projection matrix
+		glMatrixMode(GL_PROJECTION);
+		// Store the current projection matrix
+		glPushMatrix();
+		// Initialize the projection matrix to the identity matrix
+		glLoadIdentity();
+		// Set orthographic projection to include the world
+		glOrtho(-mWidth / 2, mWidth / 2, -mHeight / 2, mHeight / 2, -100, 100);
 
-	// Switch to model mode ready for rendering
-	glMatrixMode(GL_MODELVIEW);
-	// Initialize the projection matrix to the identity matrix
-	glLoadIdentity();
-	// Render every object in the world
-	for (GameObjectList::iterator it = mGameObjects.begin(); it != mGameObjects.end(); ++it) {
-		(*it)->PreRender();
-		(*it)->Render();
-		(*it)->PostRender();
+		// Switch to model mode ready for rendering
+		glMatrixMode(GL_MODELVIEW);
+		// Initialize the projection matrix to the identity matrix
+		glLoadIdentity();
+		// Render every object in the world
+		for (GameObjectList::iterator it = mGameObjects.begin(); it != mGameObjects.end(); ++it) {
+			(*it)->PreRender();
+			(*it)->Render();
+			(*it)->PostRender();
+		}
 	}
 }
 
@@ -145,6 +155,28 @@ GameObjectList GameWorld::GetCollisions(shared_ptr<GameObject> ptr)
 GameObjectList GameWorld::GetCollisions(GameObject* optr)
 {
 	return GetCollisions(shared_ptr<GameObject>(optr));
+}
+
+void GameWorld::RenderMenu()
+{
+	// Set up orthographic projection for 2D menu
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	// Render all menu objects
+	for (auto& menuObj : mMenuObjects) {
+		menuObj->PreRender();
+		menuObj->Render();
+		menuObj->PostRender();
+	}
+
+	// Restore projection
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
 }
 
 /** Update all objects. */
