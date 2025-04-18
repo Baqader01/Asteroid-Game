@@ -9,12 +9,15 @@
 #include "ScoreKeeper.h"
 #include "Player.h"
 #include "IPlayerListener.h"
+#include "GUIButton.h"
+#include "IButtonListener.h"
 
 class GameObject;
 class Spaceship;
 class GUILabel;
+class GUIButton;
 
-class Asteroids : public GameSession, public IKeyboardListener, public IGameWorldListener, public IScoreListener, public IPlayerListener
+class Asteroids : public GameSession, public IKeyboardListener, public IButtonListener, public IGameWorldListener, public IScoreListener, public IPlayerListener
 {
 public:
 	Asteroids(int argc, char *argv[]);
@@ -23,6 +26,11 @@ public:
 	virtual void Start(void);
 	virtual void Stop(void);
 
+	
+	//mouse click
+
+	void OnMouseClick(int x, int y);
+	
 	// Declaration of IKeyboardListener interface ////////////////////////////////
 
 	void OnKeyPressed(uchar key, int x, int y);
@@ -52,16 +60,34 @@ private:
 	shared_ptr<GUILabel> mScoreLabel;
 	shared_ptr<GUILabel> mLivesLabel;
 	shared_ptr<GUILabel> mGameOverLabel;
+	shared_ptr<GUIButton> mStartButton;
 
 	uint mLevel;
 	uint mAsteroidCount;
 
 	void ResetSpaceship();
 	shared_ptr<GameObject> CreateSpaceship();
+	
+	virtual void OnButtonClick(GUIButton* button) override;
+
+	
 	void CreateGUI();
+	void CreateMenu();
+	// to start fighting the astroids
+	void StartGame();
+
 	void CreateAsteroids(const uint num_asteroids);
 	shared_ptr<GameObject> CreateExplosion();
-	
+
+	// Screen dimensions
+	GLVector2f screenSize = GLVector2f(800.0f, 600.0f);
+
+	// Button dimensions
+	GLVector2f buttonSize = GLVector2f(200.0f, 50.0f);
+
+	// Position calculation (top center)
+	GLVector2f buttonPos = GLVector2f(screenSize.x / 2, screenSize.y * 0.2f);
+
 	const static uint SHOW_GAME_OVER = 0;
 	const static uint START_NEXT_LEVEL = 1;
 	const static uint CREATE_NEW_PLAYER = 2;

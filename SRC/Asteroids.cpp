@@ -9,14 +9,15 @@
 #include "Spaceship.h"
 #include "BoundingShape.h"
 #include "BoundingSphere.h"
+#include "GUIButton.h"
 #include "GUILabel.h"
 #include "Explosion.h"
 
 // PUBLIC INSTANCE CONSTRUCTORS ///////////////////////////////////////////////
 
 /** Constructor. Takes arguments from command line, just in case. */
-Asteroids::Asteroids(int argc, char *argv[])
-	: GameSession(argc, argv)
+Asteroids::Asteroids(int argc, char* argv[])
+	: GameSession(argc, argv) 
 {
 	mLevel = 0;
 	mAsteroidCount = 0;
@@ -32,45 +33,7 @@ Asteroids::~Asteroids(void)
 /** Start an asteroids game. */
 void Asteroids::Start()
 {
-	// Create a shared pointer for the Asteroids game object - DO NOT REMOVE
-	shared_ptr<Asteroids> thisPtr = shared_ptr<Asteroids>(this);
-
-	// Add this class as a listener of the game world
-	mGameWorld->AddListener(thisPtr.get());
-
-	// Add this as a listener to the world and the keyboard
-	mGameWindow->AddKeyboardListener(thisPtr);
-
-	// Add a score keeper to the game world
-	mGameWorld->AddListener(&mScoreKeeper);
-
-	// Add this class as a listener of the score keeper
-	mScoreKeeper.AddListener(thisPtr);
-
-	// Create an ambient light to show sprite textures
-	GLfloat ambient_light[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	GLfloat diffuse_light[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient_light);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse_light);
-	glEnable(GL_LIGHT0);
-
-	Animation *explosion_anim = AnimationManager::GetInstance().CreateAnimationFromFile("explosion", 64, 1024, 64, 64, "explosion_fs.png");
-	Animation *asteroid1_anim = AnimationManager::GetInstance().CreateAnimationFromFile("asteroid1", 128, 8192, 128, 128, "asteroid1_fs.png");
-	Animation *spaceship_anim = AnimationManager::GetInstance().CreateAnimationFromFile("spaceship", 128, 128, 128, 128, "spaceship_fs.png");
-
-	// Create a spaceship and add it to the world
-	mGameWorld->AddObject(CreateSpaceship());
-	// Create some asteroids and add them to the world
-	CreateAsteroids(10);
-
-	//Create the GUI
-	CreateGUI();
-
-	// Add a player (watcher) to the game world
-	mGameWorld->AddListener(&mPlayer);
-
-	// Add this class as a listener of the player
-	mPlayer.AddListener(thisPtr);
+	CreateMenu();
 
 	// Start the game
 	GameSession::Start();
@@ -84,6 +47,10 @@ void Asteroids::Stop()
 }
 
 // PUBLIC INSTANCE METHODS IMPLEMENTING IKeyboardListener /////////////////////
+
+void Asteroids::OnMouseClick(int x, int y)
+{
+}
 
 void Asteroids::OnKeyPressed(uchar key, int x, int y)
 {
@@ -172,6 +139,10 @@ void Asteroids::OnTimer(int value)
 
 }
 
+void Asteroids::ResetSpaceship()
+{
+}
+
 // PROTECTED INSTANCE METHODS /////////////////////////////////////////////////
 shared_ptr<GameObject> Asteroids::CreateSpaceship()
 {
@@ -191,6 +162,63 @@ shared_ptr<GameObject> Asteroids::CreateSpaceship()
 	// Return the spaceship so it can be added to the world
 	return mSpaceship;
 
+}
+
+void Asteroids::StartGame()
+{
+
+	// i want the game to start here instead of start, so i can put the main menu over there
+
+	// Create a shared pointer for the Asteroids game object - DO NOT REMOVE
+	shared_ptr<Asteroids> thisPtr = shared_ptr<Asteroids>(this);
+
+	// Add this class as a listener of the game world
+	mGameWorld->AddListener(thisPtr.get());
+
+	// Add this as a listener to the world and the keyboard
+	mGameWindow->AddKeyboardListener(thisPtr);
+
+	// Create an ambient light to show sprite textures
+	GLfloat ambient_light[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	GLfloat diffuse_light[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient_light);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse_light);
+	glEnable(GL_LIGHT0);
+
+	Animation* explosion_anim = AnimationManager::GetInstance().CreateAnimationFromFile("explosion", 64, 1024, 64, 64, "explosion_fs.png");
+	Animation* asteroid1_anim = AnimationManager::GetInstance().CreateAnimationFromFile("asteroid1", 128, 8192, 128, 128, "asteroid1_fs.png");
+	Animation* spaceship_anim = AnimationManager::GetInstance().CreateAnimationFromFile("spaceship", 128, 128, 128, 128, "spaceship_fs.png");
+
+	//Create the GUI
+	CreateGUI();
+
+	// Clear any existing objects
+	//mGameWorld->ClearObjects();
+
+	// Add a score keeper to the game world
+	mGameWorld->AddListener(&mScoreKeeper);
+
+	// Add this class as a listener of the score keeper
+	mScoreKeeper.AddListener(thisPtr);
+
+	// Create and add the spaceship
+	mGameWorld->AddObject(CreateSpaceship());
+
+	// Create initial asteroids
+	CreateAsteroids(10);
+
+	// Reset game state
+	mLevel = 0;
+	//mScoreKeeper.ResetScore();
+
+	// Add a player (watcher) to the game world
+	mGameWorld->AddListener(&mPlayer);
+
+	// Add this class as a listener of the player
+	mPlayer.AddListener(thisPtr);
+
+	// Change to playing state
+	mGameWorld->SetState(GameState::PLAYING);
 }
 
 void Asteroids::CreateAsteroids(const uint num_asteroids)
@@ -244,6 +272,37 @@ void Asteroids::CreateGUI()
 		= static_pointer_cast<GUIComponent>(mGameOverLabel);
 	mGameDisplay->GetContainer()->AddComponent(game_over_component, GLVector2f(0.5f, 0.5f));
 
+}
+
+// my function
+void Asteroids::CreateMenu()
+{
+	// Create start button
+	mStartButton = std::make_shared<GUIButton>("Start Game");
+
+	// Set button properties
+	mStartButton->SetSize(GLVector2i(200, 50));
+	mStartButton->SetColor(GLVector3f(1.0f, 1.0f, 1.0f));
+	mStartButton->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+	mStartButton->SetVerticalAlignment(GUIComponent::GUI_VALIGN_MIDDLE);
+
+	// Set click callback
+	mStartButton->SetClickListener([this]() {
+		StartGame();
+		});
+
+	// Add button to container
+	if (mGameDisplay && mGameDisplay->GetContainer()) {
+		mGameDisplay->GetContainer()->AddComponent(
+			std::static_pointer_cast<GUIComponent>(mStartButton),
+			GLVector2f(0.5f, 0.5f));
+	}
+}
+void Asteroids::OnButtonClick(GUIButton* button)
+{
+	if (button == mStartButton.get()) {
+		StartGame();
+	}
 }
 
 void Asteroids::OnScoreChanged(int score)
