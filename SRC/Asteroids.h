@@ -9,7 +9,7 @@
 #include "ScoreKeeper.h"
 #include "Player.h"
 #include "IPlayerListener.h"
-#include "GUIButton.h"
+#include "Button.h"
 #include "IButtonListener.h"
 
 class GameObject;
@@ -60,7 +60,7 @@ private:
 	shared_ptr<GUILabel> mScoreLabel;
 	shared_ptr<GUILabel> mLivesLabel;
 	shared_ptr<GUILabel> mGameOverLabel;
-	shared_ptr<GUIButton> mStartButton;
+	shared_ptr<Button> mStartButton;
 
 	uint mLevel;
 	uint mAsteroidCount;
@@ -68,7 +68,7 @@ private:
 	void ResetSpaceship();
 	shared_ptr<GameObject> CreateSpaceship();
 	
-	virtual void OnButtonClick(GUIButton* button) override;
+	virtual void OnButtonClick(Button* button);
 
 	
 	void CreateGUI();

@@ -11,8 +11,8 @@
 GameSession::GameSession(int argc, char *argv[])
 {
 	mGameWorld = new GameWorld();
-	mGameDisplay = new GameDisplay(400, 400);
-	mGameWindow = new GameWindow(400, 400, -1, -1, "GameWindow");
+	mGameDisplay = new GameDisplay(700, 600);
+	mGameWindow = new GameWindow(700, 600, -1, -1, "GameWindow");
 	mGameWindow->SetDisplay(mGameDisplay);
 	mGameWindow->SetWorld(mGameWorld);
 	// Set the window for this session

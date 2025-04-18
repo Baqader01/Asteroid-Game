@@ -9,7 +9,7 @@
 #include "Spaceship.h"
 #include "BoundingShape.h"
 #include "BoundingSphere.h"
-#include "GUIButton.h"
+#include "Button.h"
 #include "GUILabel.h"
 #include "Explosion.h"
 
@@ -278,13 +278,13 @@ void Asteroids::CreateGUI()
 void Asteroids::CreateMenu()
 {
 	// Create start button
-	mStartButton = std::make_shared<GUIButton>("Start Game");
+	mStartButton = std::make_shared<Button>("Start Game");
 
 	// Set button properties
 	mStartButton->SetSize(GLVector2i(200, 50));
 	mStartButton->SetColor(GLVector3f(1.0f, 1.0f, 1.0f));
-	mStartButton->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
-	mStartButton->SetVerticalAlignment(GUIComponent::GUI_VALIGN_MIDDLE);
+	mStartButton->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_LEFT);
+	mStartButton->SetVerticalAlignment(GUIComponent::GUI_VALIGN_BOTTOM);
 
 	// Set click callback
 	mStartButton->SetClickListener([this]() {
@@ -292,13 +292,13 @@ void Asteroids::CreateMenu()
 		});
 
 	// Add button to container
-	if (mGameDisplay && mGameDisplay->GetContainer()) {
+	if (mGameDisplay && mGameDisplay->GetContainer()) { 
 		mGameDisplay->GetContainer()->AddComponent(
 			std::static_pointer_cast<GUIComponent>(mStartButton),
 			GLVector2f(0.5f, 0.5f));
 	}
 }
-void Asteroids::OnButtonClick(GUIButton* button)
+void Asteroids::OnButtonClick(Button* button)
 {
 	if (button == mStartButton.get()) {
 		StartGame();
