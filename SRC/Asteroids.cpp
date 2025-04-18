@@ -9,6 +9,7 @@
 #include "Spaceship.h"
 #include "BoundingShape.h"
 #include "BoundingSphere.h"
+#include "Button.h"
 #include "GUILabel.h"
 #include "Explosion.h"
 
@@ -32,45 +33,7 @@ Asteroids::~Asteroids(void)
 /** Start an asteroids game. */
 void Asteroids::Start()
 {
-	// Create a shared pointer for the Asteroids game object - DO NOT REMOVE
-	shared_ptr<Asteroids> thisPtr = shared_ptr<Asteroids>(this);
-
-	// Add this class as a listener of the game world
-	mGameWorld->AddListener(thisPtr.get());
-
-	// Add this as a listener to the world and the keyboard
-	mGameWindow->AddKeyboardListener(thisPtr);
-
-	// Add a score keeper to the game world
-	mGameWorld->AddListener(&mScoreKeeper);
-
-	// Add this class as a listener of the score keeper
-	mScoreKeeper.AddListener(thisPtr);
-
-	// Create an ambient light to show sprite textures
-	GLfloat ambient_light[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	GLfloat diffuse_light[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient_light);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse_light);
-	glEnable(GL_LIGHT0);
-
-	Animation *explosion_anim = AnimationManager::GetInstance().CreateAnimationFromFile("explosion", 64, 1024, 64, 64, "explosion_fs.png");
-	Animation *asteroid1_anim = AnimationManager::GetInstance().CreateAnimationFromFile("asteroid1", 128, 8192, 128, 128, "asteroid1_fs.png");
-	Animation *spaceship_anim = AnimationManager::GetInstance().CreateAnimationFromFile("spaceship", 128, 128, 128, 128, "spaceship_fs.png");
-
-	// Create a spaceship and add it to the world
-	mGameWorld->AddObject(CreateSpaceship());
-	// Create some asteroids and add them to the world
-	CreateAsteroids(10);
-
-	//Create the GUI
-	CreateGUI();
-
-	// Add a player (watcher) to the game world
-	mGameWorld->AddListener(&mPlayer);
-
-	// Add this class as a listener of the player
-	mPlayer.AddListener(thisPtr);
+	CreateMenu();
 
 	// Start the game
 	GameSession::Start();
@@ -193,6 +156,63 @@ shared_ptr<GameObject> Asteroids::CreateSpaceship()
 
 }
 
+void Asteroids::StartGame()
+{
+
+	// i want the game to start here instead of start, so i can put the main menu over there
+
+	// Create a shared pointer for the Asteroids game object - DO NOT REMOVE
+	shared_ptr<Asteroids> thisPtr = shared_ptr<Asteroids>(this);
+
+	// Add this class as a listener of the game world
+	mGameWorld->AddListener(thisPtr.get());
+
+	// Add this as a listener to the world and the keyboard
+	mGameWindow->AddKeyboardListener(thisPtr);
+
+	// Create an ambient light to show sprite textures
+	GLfloat ambient_light[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	GLfloat diffuse_light[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient_light);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse_light);
+	glEnable(GL_LIGHT0);
+
+	Animation* explosion_anim = AnimationManager::GetInstance().CreateAnimationFromFile("explosion", 64, 1024, 64, 64, "explosion_fs.png");
+	Animation* asteroid1_anim = AnimationManager::GetInstance().CreateAnimationFromFile("asteroid1", 128, 8192, 128, 128, "asteroid1_fs.png");
+	Animation* spaceship_anim = AnimationManager::GetInstance().CreateAnimationFromFile("spaceship", 128, 128, 128, 128, "spaceship_fs.png");
+
+	//Create the GUI
+	CreateGUI();
+
+	// Clear any existing objects
+	//mGameWorld->ClearObjects();
+
+	// Add a score keeper to the game world
+	mGameWorld->AddListener(&mScoreKeeper);
+
+	// Add this class as a listener of the score keeper
+	mScoreKeeper.AddListener(thisPtr);
+
+	// Create and add the spaceship
+	mGameWorld->AddObject(CreateSpaceship());
+
+	// Create initial asteroids
+	CreateAsteroids(10);
+
+	// Reset game state
+	mLevel = 0;
+	//mScoreKeeper.ResetScore();
+
+	// Add a player (watcher) to the game world
+	mGameWorld->AddListener(&mPlayer);
+
+	// Add this class as a listener of the player
+	mPlayer.AddListener(thisPtr);
+
+	// Change to playing state
+	mGameWorld->SetState(GameState::PLAYING);
+}
+
 void Asteroids::CreateAsteroids(const uint num_asteroids)
 {
 	mAsteroidCount = num_asteroids;
@@ -244,6 +264,38 @@ void Asteroids::CreateGUI()
 		= static_pointer_cast<GUIComponent>(mGameOverLabel);
 	mGameDisplay->GetContainer()->AddComponent(game_over_component, GLVector2f(0.5f, 0.5f));
 
+}
+
+// my function
+void Asteroids::CreateMenu()
+{
+	// Clear any existing components
+	//mGameDisplay->GetContainer()->ClearComponents();
+
+	// Create the Start button
+	GLVector2f buttonSize(200.0f, 50.0f);
+	button = std::make_shared<Button>(GLVector2f(0, 0), buttonSize, "START");
+
+	// Set button click handler
+	button->SetOnClick([this]() {
+		this->StartGame();
+		});
+
+	// Add button to the container (centered at top)
+	mGameDisplay->GetContainer()->AddComponent(
+		std::static_pointer_cast<GUIComponent>(button),
+		GLVector2f(0.5f, 0.1f) // 50% X (center), 10% Y from top
+	);
+}
+
+void Asteroids::OnMouseClick(int x, int y) {
+	if (button && mGameWorld->GetState() == GameState::MENU) {
+		// Convert to GL coordinates (y-inverted)
+		GLVector2f mousePos(x, mGameWorld->GetHeight() - y);
+		if (button->IsMouseOver(mousePos)) {
+			button->OnClick();
+		}
+	}
 }
 
 void Asteroids::OnScoreChanged(int score)
