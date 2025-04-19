@@ -39,19 +39,18 @@ void Button::Draw()
     glVertex2i(mPosition.x, mPosition.y + mSize.y);
     glEnd();
 
-    // Calculate text position for perfect centering
+    // Calculate text position (centered within button)
     int textWidth = 0;
     for (const char& c : mLabel) {
         textWidth += glutBitmapWidth(GLUT_BITMAP_HELVETICA_18, c);
     }
 
-    int horizontalPadding = (mSize.x - textWidth) / 2;
-    int verticalPadding = (mSize.y - 18) / 2; // 18 is font height
+    int textX = mPosition.x + (mSize.x - textWidth) / 2;
+    int textY = mPosition.y + 18 + 5; // Font height + padding
 
     // Draw centered text
     glColor3f(mColor.x, mColor.y, mColor.z);
-    glRasterPos2i(mPosition.x + horizontalPadding,
-        mPosition.y + verticalPadding + 15); // +15 for baseline
+    glRasterPos2i(textX, textY);
 
     for (const char& c : mLabel) {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
@@ -60,14 +59,40 @@ void Button::Draw()
     glPopAttrib();
 }
 
+bool Button::IsPointInside(int x, int y) const {
+    return x >= mPosition.x &&
+        x <= mPosition.x + mSize.x &&
+        y >= mPosition.y &&
+        y <= mPosition.y + mSize.y;
+}
+
 void Button::OnMouseClick(int x, int y)
 {
-    if (!mVisible) return;
+    bool inside = (x >= mPosition.x) && (x <= mPosition.x + mSize.x) &&
+        (y >= mPosition.y) && (y <= mPosition.y + mSize.y);
 
-    if (x >= mPosition.x && x <= mPosition.x + mSize.x &&
-        y >= mPosition.y && y <= mPosition.y + mSize.y) {
-        if (mClickCallback) {
-            mClickCallback();
-        }
+    std::cout << "Button \"" << mLabel << "\" click test: "
+        << "Mouse(" << x << "," << y << ") "
+        << "Button(" << mPosition.x << "," << mPosition.y << ")-("
+        << mPosition.x + mSize.x << "," << mPosition.y + mSize.y << ") "
+        << "Inside: " << inside << std::endl;
+
+    if (inside && mClickCallback) {
+        std::cout << "Triggering button callback" << std::endl;
+        mClickCallback();
     }
 }
+
+void Button::SetClickListener(std::function<void()> callback) {
+    mClickCallback = callback;
+}
+void Button::SetHorizontalAlignment(GUIHorizontalAlignment alignment) {
+    mHorizontalAlignment = alignment;
+}
+
+void Button::SetVerticalAlignment(GUIVerticalAlignment alignment) {
+    mVerticalAlignment = alignment;
+}
+
+
+

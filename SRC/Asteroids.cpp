@@ -48,8 +48,25 @@ void Asteroids::Stop()
 
 // PUBLIC INSTANCE METHODS IMPLEMENTING IKeyboardListener /////////////////////
 
-void Asteroids::OnMouseClick(int x, int y)
+void Asteroids::OnMouseButton(int button, int state, int x, int y)
 {
+	std::cout << "Mouse event - Button: " << button
+		<< " State: " << state
+		<< " at (" << x << "," << y << ")" << std::endl;
+
+	y = glutGet(GLUT_WINDOW_HEIGHT) - y;
+
+	if (button == 0 && state == 0) {
+		std::cout << "Processing left click at (" << x << "," << y << ")" << std::endl;
+		for (auto& btn : mButtons) {
+			if (btn->GetVisible()) {
+				std::cout << "Checking button at ("
+					<< btn->GetPosition().x << ","
+					<< btn->GetPosition().y << ")" << std::endl;
+				btn->OnMouseClick(x, y);
+			}
+		}
+	}
 }
 
 void Asteroids::OnKeyPressed(uchar key, int x, int y)
@@ -166,8 +183,9 @@ shared_ptr<GameObject> Asteroids::CreateSpaceship()
 
 void Asteroids::StartGame()
 {
-
 	// i want the game to start here instead of start, so i can put the main menu over there
+
+	HideMenu();
 
 	// Create a shared pointer for the Asteroids game object - DO NOT REMOVE
 	shared_ptr<Asteroids> thisPtr = shared_ptr<Asteroids>(this);
@@ -218,7 +236,7 @@ void Asteroids::StartGame()
 	mPlayer.AddListener(thisPtr);
 
 	// Change to playing state
-	mGameWorld->SetState(GameState::PLAYING);
+	mGameWorld->SetState(::GameState::PLAYING);
 }
 
 void Asteroids::CreateAsteroids(const uint num_asteroids)
@@ -277,27 +295,49 @@ void Asteroids::CreateGUI()
 // my function
 void Asteroids::CreateMenu()
 {
-	// Create start button
-	mStartButton = std::make_shared<Button>("Start Game");
+	mButtons.clear(); // Clear existing buttons
 
-	// Set button properties
-	mStartButton->SetSize(GLVector2i(200, 50));
-	mStartButton->SetColor(GLVector3f(1.0f, 1.0f, 1.0f));
-	mStartButton->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_LEFT);
-	mStartButton->SetVerticalAlignment(GUIComponent::GUI_VALIGN_BOTTOM);
-
-	// Set click callback
-	mStartButton->SetClickListener([this]() {
-		StartGame();
+	// Create Start button
+	auto startBtn = std::make_shared<Button>("Start Game");
+	startBtn->SetSize(GLVector2i(200, 50));
+	startBtn->SetClickListener([this]() {
+		this->StartGame();
 		});
+	mButtons.push_back(startBtn);
 
-	// Add button to container
-	if (mGameDisplay && mGameDisplay->GetContainer()) { 
+	// Create other menu buttons (Help, Exit, etc.)
+	auto helpBtn = std::make_shared<Button>("Help");
+	helpBtn->SetSize(GLVector2i(200, 50));
+	helpBtn->SetClickListener([this]() {  }); //i havent implemented it yet
+	mButtons.push_back(helpBtn);
+
+	// Position and add buttons to display
+	float yPos = 0.8f;
+	for (auto& btn : mButtons) {
 		mGameDisplay->GetContainer()->AddComponent(
-			std::static_pointer_cast<GUIComponent>(mStartButton),
-			GLVector2f(0.5f, 0.5f));
+			std::static_pointer_cast<GUIComponent>(btn),
+			GLVector2f(0.35f, yPos));
+		yPos -= 0.15f; // Stack buttons vertically
 	}
 }
+
+void Asteroids::ShowMenu()
+{
+	mCurrentState = ::GameState::MENU;
+	for (auto& btn : mButtons) {
+		btn->SetVisible(true);
+	}
+	// Hide game elements if needed
+	mGameOverLabel->SetVisible(false);
+}
+
+void Asteroids::HideMenu()
+{
+	for (auto& btn : mButtons) {
+		btn->SetVisible(false);
+	}
+}
+
 void Asteroids::OnButtonClick(Button* button)
 {
 	if (button == mStartButton.get()) {

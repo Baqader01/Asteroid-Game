@@ -11,6 +11,7 @@
 #include "IPlayerListener.h"
 #include "Button.h"
 #include "IButtonListener.h"
+#include <vector>
 
 class GameObject;
 class Spaceship;
@@ -28,8 +29,9 @@ public:
 
 	
 	//mouse click
-
-	void OnMouseClick(int x, int y);
+	void OnMouseButton(int button, int state, int x, int y);
+	void OnMouseMove(int x, int y) {};
+	void OnMouseDrag(int x, int y) {};
 	
 	// Declaration of IKeyboardListener interface ////////////////////////////////
 
@@ -61,6 +63,12 @@ private:
 	shared_ptr<GUILabel> mLivesLabel;
 	shared_ptr<GUILabel> mGameOverLabel;
 	shared_ptr<Button> mStartButton;
+	shared_ptr<Button> mHelpButton;
+
+	std::vector<std::shared_ptr<Button>> mButtons;
+
+	enum class GameState { MENU, PLAYING, GAME_OVER };
+	::GameState mCurrentState = ::GameState::MENU; 
 
 	uint mLevel;
 	uint mAsteroidCount;
@@ -70,9 +78,14 @@ private:
 	
 	virtual void OnButtonClick(Button* button);
 
-	
+	// GUI
 	void CreateGUI();
+
+	// Menu
 	void CreateMenu();
+	void ShowMenu();
+	void HideMenu();
+
 	// to start fighting the astroids
 	void StartGame();
 
