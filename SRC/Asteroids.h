@@ -18,7 +18,7 @@ class Spaceship;
 class GUILabel;
 class GUIButton;
 
-class Asteroids : public GameSession, public IKeyboardListener, public IButtonListener, public IGameWorldListener, public IScoreListener, public IPlayerListener
+class Asteroids : public GameSession, public IKeyboardListener, public IGameWorldListener, public IScoreListener, public IPlayerListener
 {
 public:
 	Asteroids(int argc, char *argv[]);

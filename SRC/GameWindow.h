@@ -4,26 +4,16 @@
 #include "GameUtil.h"
 #include "GlutWindow.h"
 #include "IKeyboardListener.h"
-#include "IMouseListener.h"
 #include <vector>
 
 class GameWorld;
 class GameDisplay;
 
-class GameWindow : public GlutWindow, public IMouseListener
+class GameWindow : public GlutWindow
 {
 public:
 	GameWindow(int w, int h, int x, int y, char* t);
 	virtual ~GameWindow();
-
-	// Mouse handling
-	void OnMouseButton(int button, int state, int x, int y) override;
-	void OnMouseMove(int x, int y) {}
-	void OnMouseDrag(int x, int y) {}
-
-	// Callback registration
-	void AddMouseListener(std::shared_ptr<IMouseListener> listener);
-	void RemoveMouseListener(std::shared_ptr<IMouseListener> listener);
 
 	virtual void OnDisplay(void);
 	virtual void OnIdle(void);
