@@ -81,6 +81,8 @@ private:
 	void ShowMenu();
 	void HideMenu();
 
+	void DrawMenuBackground();
+
 	// to start fighting the astroids
 	void StartGame();
 

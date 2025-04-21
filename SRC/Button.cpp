@@ -20,19 +20,24 @@ void Button::Draw()
 
     glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT);
 
-    // Determine button color based on state
-    GLVector3f bgColor;
-    if (mIsPressed) {
-        bgColor = mPressedColor;
-    }
-    else if (mIsHovered) {
-        bgColor = mHoverColor;
-    }
-    else {
-        bgColor = mNormalColor;
-    }
+    // Retro Asteroids color scheme
+    mNormalColor = GLVector3f(0.1f, 0.1f, 0.8f);   // Deep blue
+    mHoverColor = GLVector3f(0.3f, 0.3f, 1.0f);    // Bright blue
+    mPressedColor = GLVector3f(0.0f, 0.0f, 0.6f);  // Dark blue
 
-    // Draw button background with current state color
+    // Draw button outline
+    glLineWidth(3.0f);
+    glColor3f(1.0f, 1.0f, 1.0f); // White border
+    glBegin(GL_LINE_LOOP);
+    glVertex2i(mPosition.x - 1, mPosition.y - 1);
+    glVertex2i(mPosition.x + mSize.x + 1, mPosition.y - 1);
+    glVertex2i(mPosition.x + mSize.x + 1, mPosition.y + mSize.y + 1);
+    glVertex2i(mPosition.x - 1, mPosition.y + mSize.y + 1);
+    glEnd();
+
+    // Draw button face
+    GLVector3f bgColor = mIsPressed ? mPressedColor :
+        (mIsHovered ? mHoverColor : mNormalColor);
     glColor3f(bgColor.x, bgColor.y, bgColor.z);
     glBegin(GL_QUADS);
     glVertex2i(mPosition.x, mPosition.y);
@@ -41,27 +46,28 @@ void Button::Draw()
     glVertex2i(mPosition.x, mPosition.y + mSize.y);
     glEnd();
 
-    // Draw button border (lighter when hovered)
-    glColor3f(bgColor.x + 0.3f, bgColor.y + 0.3f, bgColor.z + 0.3f);
-    glLineWidth(1.5f);
-    glBegin(GL_LINE_LOOP);
-    glVertex2i(mPosition.x, mPosition.y);
-    glVertex2i(mPosition.x + mSize.x, mPosition.y);
-    glVertex2i(mPosition.x + mSize.x, mPosition.y + mSize.y);
-    glVertex2i(mPosition.x, mPosition.y + mSize.y);
-    glEnd();
-
-    // Calculate text position (centered within button)
+    // PERFECT CENTERING CALCULATION
     int textWidth = 0;
     for (const char& c : mLabel) {
         textWidth += glutBitmapWidth(GLUT_BITMAP_HELVETICA_18, c);
     }
 
+    // Horizontal center
     int textX = mPosition.x + (mSize.x - textWidth) / 2;
-    int textY = mPosition.y + (mSize.y / 2) + 6; // Better vertical centering
 
-    // Draw text with current text color
-    glColor3f(mTextColor.x, mTextColor.y, mTextColor.z);
+    // Vertical center (key fix)
+    int fontHeight = 12; // GLUT_BITMAP_HELVETICA_18 is actually 12px tall
+    int textY = mPosition.y + (mSize.y / 2) + (fontHeight / 2) - 2; // -2 is the magic number
+
+    // Draw text with outline
+    glColor3f(0.0f, 0.0f, 0.0f); // Black outline
+    glRasterPos2i(textX + 1, textY - 1);
+    for (const char& c : mLabel) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
+    }
+
+    // Main text (white)
+    glColor3f(1.0f, 1.0f, 1.0f);
     glRasterPos2i(textX, textY);
     for (const char& c : mLabel) {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
@@ -114,11 +120,9 @@ void Button::OnMouseDrag(int x, int y)
 void Button::SetHorizontalAlignment(GUIHorizontalAlignment alignment)
 {
     mHorizontalAlignment = alignment;
-    // You might want to recalculate position here
 }
 
 void Button::SetVerticalAlignment(GUIVerticalAlignment alignment)
 {
     mVerticalAlignment = alignment;
-    // You might want to recalculate position here
 }

@@ -270,9 +270,38 @@ void Asteroids::CreateGUI()
 
 }
 
+void Asteroids::DrawMenuBackground()
+{
+	// Starfield background
+	glColor3f(1.0f, 1.0f, 1.0f);
+	glBegin(GL_POINTS);
+	for (int i = 0; i < 100; i++) {
+		glVertex2f(rand() % GLUT_SCREEN_WIDTH, rand() % GLUT_SCREEN_HEIGHT);
+	}
+	glEnd();
+
+	// Asteroids logo text (big blocky letters)
+	const char* title = "ASTEROIDS";
+	int titleWidth = 0;
+	for (const char* c = title; *c; c++) {
+		titleWidth += glutBitmapWidth(GLUT_BITMAP_HELVETICA_18, *c) * 2;
+	}
+
+	glColor3f(0.0f, 1.0f, 0.0f); // Green
+	glRasterPos2i((GLUT_SCREEN_WIDTH - titleWidth) / 2, GLUT_SCREEN_HEIGHT - 100);
+	for (const char* c = title; *c; c++) {
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
+		// Extra spacing for retro look
+		//glRasterPos2i(glutGet(GLUT_CURRENT_RASTER_POSITION_X) + 20,
+		//	glutGet(GLUT_CURRENT_RASTER_POSITION_Y));
+	}
+}
+
 // my function
 void Asteroids::CreateMenu()
 {
+	DrawMenuBackground();
+
 	// Create Start button
 	mStartButton = make_shared<Button>("Start Game");
 	mStartButton->SetSize(GLVector2i(200, 50));
