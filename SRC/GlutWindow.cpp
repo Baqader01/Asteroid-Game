@@ -83,27 +83,28 @@ void GlutWindow::OnSpecialKeyReleased(int key, int x, int y)
 	}
 }   
 
-void GlutWindow::OnMouseDragged(int x, int y)
+//mouse implementation
+void GlutWindow::OnMouseClick(int button, int state, int x, int y)
 {
-	// Send mouse message to all listeners
-	for (MouseListenerList::iterator it = mMouseListeners.begin(); it != mMouseListeners.end(); ++it) {
-		(*it)->OnMouseDragged(x, y);
+	// Dispatch to all mouse listeners
+	for (auto& listener : mMouseListeners) {
+		listener->OnMouseClick(button, state, x, y);
 	}
 }
 
-void GlutWindow::OnMouseButton(int button, int state, int x, int y)
+void GlutWindow::OnMouseMove(int x, int y)
 {
-	// Send mouse message to all listeners
-	for (MouseListenerList::iterator it = mMouseListeners.begin(); it != mMouseListeners.end(); ++it) {
-		(*it)->OnMouseButton(button, state, x, y);
+	// Dispatch to all mouse listeners
+	for (auto& listener : mMouseListeners) {
+		listener->OnMouseMove(x, y);
 	}
 }
 
-void GlutWindow::OnMouseMoved(int x, int y)
+void GlutWindow::OnMouseDrag(int x, int y)
 {
-	// Send mouse message to all listeners
-	for (MouseListenerList::iterator it = mMouseListeners.begin(); it != mMouseListeners.end(); ++it) {
-		(*it)->OnMouseMoved(x, y);
+	// Dispatch to all mouse listeners
+	for (auto& listener : mMouseListeners) {
+		listener->OnMouseDrag(x, y);
 	}
 }
 

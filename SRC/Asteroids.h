@@ -26,12 +26,6 @@ public:
 
 	virtual void Start(void);
 	virtual void Stop(void);
-
-	
-	//mouse click
-	void OnMouseButton(int button, int state, int x, int y);
-	void OnMouseMove(int x, int y) {};
-	void OnMouseDrag(int x, int y) {};
 	
 	// Declaration of IKeyboardListener interface ////////////////////////////////
 
@@ -65,7 +59,8 @@ private:
 	shared_ptr<Button> mStartButton;
 	shared_ptr<Button> mHelpButton;
 
-	std::vector<std::shared_ptr<Button>> mButtons;
+	vector<shared_ptr<Button>> mButtons;
+	vector<shared_ptr<IMouseListener>> mMouseListeners;
 
 	enum class GameState { MENU, PLAYING, GAME_OVER };
 	::GameState mCurrentState = ::GameState::MENU; 

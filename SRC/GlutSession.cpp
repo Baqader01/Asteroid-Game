@@ -46,19 +46,19 @@ void GlutSession::CallBackSpecialUpFunc(int key, int x, int y)
 void GlutSession::CallBackMotionFunc(int x, int y)
 {
 	// Pass callback to window
-	if (mWindow) mWindow->OnMouseDragged(x, y);
+	if (mWindow) mWindow->OnMouseDrag(x, y);
 }
 
 void GlutSession::CallBackMouseFunc(int button, int state, int x, int y)
 {
 	// Pass callback to window
-	if (mWindow) mWindow->OnMouseButton(button, state, x, y);
+	if (mWindow) mWindow->OnMouseClick(button, state, x, y);
 }
 
 void GlutSession::CallBackPassiveMotionFunc(int x, int y)
 {
 	// Pass callback to window
-	if (mWindow) mWindow->OnMouseMoved(x, y);
+	if (mWindow) mWindow->OnMouseMove(x, y);
 }
 
 void GlutSession::CallBackReshapeFunc(int w, int h)

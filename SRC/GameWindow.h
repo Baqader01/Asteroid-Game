@@ -19,8 +19,6 @@ public:
 	virtual void OnIdle(void);
 	virtual void OnWindowReshaped(int w, int h);
 
-	void OnMouseClick(int button, int state, int x, int y);
-
 	void UpdateWorldSize(void);
 	void UpdateDisplaySize(void);
 
@@ -32,7 +30,6 @@ public:
 
 protected:
 	static const int ZOOM_LEVEL;
-	vector<std::shared_ptr<IMouseListener>> mMouseListeners;
 
 	GameWorld* mWorld;
 	GameDisplay* mDisplay;

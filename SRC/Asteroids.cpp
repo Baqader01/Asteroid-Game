@@ -47,28 +47,6 @@ void Asteroids::Stop()
 }
 
 // PUBLIC INSTANCE METHODS IMPLEMENTING IKeyboardListener /////////////////////
-
-void Asteroids::OnMouseButton(int button, int state, int x, int y)
-{
-	std::cout << "Mouse event - Button: " << button
-		<< " State: " << state
-		<< " at (" << x << "," << y << ")" << std::endl;
-
-	y = glutGet(GLUT_WINDOW_HEIGHT) - y;
-
-	if (button == 0 && state == 0) {
-		std::cout << "Processing left click at (" << x << "," << y << ")" << std::endl;
-		for (auto& btn : mButtons) {
-			if (btn->GetVisible()) {
-				std::cout << "Checking button at ("
-					<< btn->GetPosition().x << ","
-					<< btn->GetPosition().y << ")" << std::endl;
-				btn->OnMouseClick(x, y);
-			}
-		}
-	}
-}
-
 void Asteroids::OnKeyPressed(uchar key, int x, int y)
 {
 	switch (key)
@@ -295,15 +273,17 @@ void Asteroids::CreateGUI()
 // my function
 void Asteroids::CreateMenu()
 {
-	mButtons.clear(); // Clear existing buttons
-
 	// Create Start button
-	auto startBtn = std::make_shared<Button>("Start Game");
-	startBtn->SetSize(GLVector2i(200, 50));
-	startBtn->SetClickListener([this]() {
-		this->StartGame();
+	mStartButton = make_shared<Button>("Start Game");
+	mStartButton->SetSize(GLVector2i(200, 50));
+	mStartButton->SetClickListener([this]() {
+		StartGame();
+		HideMenu();
 		});
-	mButtons.push_back(startBtn);
+
+	// Register with window
+	mGameWindow->AddMouseListener(mStartButton);
+	mButtons.push_back(mStartButton);
 
 	// Create other menu buttons (Help, Exit, etc.)
 	auto helpBtn = std::make_shared<Button>("Help");
@@ -317,7 +297,7 @@ void Asteroids::CreateMenu()
 		mGameDisplay->GetContainer()->AddComponent(
 			std::static_pointer_cast<GUIComponent>(btn),
 			GLVector2f(0.35f, yPos));
-		yPos -= 0.15f; // Stack buttons vertically
+		yPos -= 0.10f; // Stack buttons vertically
 	}
 }
 
@@ -333,9 +313,10 @@ void Asteroids::ShowMenu()
 
 void Asteroids::HideMenu()
 {
-	for (auto& btn : mButtons) {
-		btn->SetVisible(false);
+	for (auto& button : mButtons) {
+		mGameWindow->RemoveMouseListener(button);
 	}
+	mButtons.clear();
 }
 
 void Asteroids::OnButtonClick(Button* button)

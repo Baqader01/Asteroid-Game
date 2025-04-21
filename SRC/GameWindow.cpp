@@ -21,19 +21,7 @@ GameWindow::~GameWindow()
 {
 }
 
-void GameWindow::OnMouseButton(int button, int state, int x, int y)
-{
-}
-
 // PUBLIC INSTANCE METHODS ////////////////////////////////////////////////////
-
-void GameWindow::AddMouseListener(std::shared_ptr<IMouseListener> listener)
-{
-}
-
-void GameWindow::RemoveMouseListener(std::shared_ptr<IMouseListener> listener)
-{
-}
 
 /** Call world and display to render themselves. */
 void GameWindow::OnDisplay(void)
@@ -82,9 +70,9 @@ void GameWindow::SetDisplay(GameDisplay* d) { mDisplay = d; UpdateDisplaySize();
 GameDisplay* GameWindow::GetDisplay() { return mDisplay; }
 
 //adding a mouse click
-void GameWindow::OnMouseClick(int button, int state, int x, int y)
-{
-}
+//void GameWindow::OnMouseClick(int button, int state, int x, int y)
+//{
+//}
 
 void GameWindow::UpdateWorldSize()
 {
