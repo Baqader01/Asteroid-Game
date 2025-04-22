@@ -34,7 +34,6 @@ Asteroids::~Asteroids(void)
 void Asteroids::Start()
 {
 	CreateMenu();
-
 	// Start the game
 	GameSession::Start();
 }
@@ -162,7 +161,6 @@ shared_ptr<GameObject> Asteroids::CreateSpaceship()
 void Asteroids::StartGame()
 {
 	// i want the game to start here instead of start, so i can put the main menu over there
-
 	HideMenu();
 
 	// Create a shared pointer for the Asteroids game object - DO NOT REMOVE
@@ -215,6 +213,8 @@ void Asteroids::StartGame()
 
 	// Change to playing state
 	mGameWorld->SetState(::GameState::PLAYING);
+
+
 }
 
 void Asteroids::CreateAsteroids(const uint num_asteroids)
@@ -300,7 +300,7 @@ void Asteroids::DrawMenuBackground()
 // my function
 void Asteroids::CreateMenu()
 {
-	DrawMenuBackground();
+	//DrawMenuBackground();
 
 	// Create Start button
 	mStartButton = make_shared<Button>("Start Game");

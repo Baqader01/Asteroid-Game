@@ -18,63 +18,43 @@ void Button::Draw()
 {
     if (!mVisible) return;
 
-    glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT);
+    // Determine button background color based on state
+    GLVector3f bgColor = mNormalColor;
+    if (mIsPressed)
+        bgColor = mPressedColor;
+    else if (mIsHovered)
+        bgColor = mHoverColor;
 
-    // Retro Asteroids color scheme
-    mNormalColor = GLVector3f(0.1f, 0.1f, 0.8f);   // Deep blue
-    mHoverColor = GLVector3f(0.3f, 0.3f, 1.0f);    // Bright blue
-    mPressedColor = GLVector3f(0.0f, 0.0f, 0.6f);  // Dark blue
-
-    // Draw button outline
-    glLineWidth(3.0f);
-    glColor3f(1.0f, 1.0f, 1.0f); // White border
-    glBegin(GL_LINE_LOOP);
-    glVertex2i(mPosition.x - 1, mPosition.y - 1);
-    glVertex2i(mPosition.x + mSize.x + 1, mPosition.y - 1);
-    glVertex2i(mPosition.x + mSize.x + 1, mPosition.y + mSize.y + 1);
-    glVertex2i(mPosition.x - 1, mPosition.y + mSize.y + 1);
-    glEnd();
-
-    // Draw button face
-    GLVector3f bgColor = mIsPressed ? mPressedColor :
-        (mIsHovered ? mHoverColor : mNormalColor);
+    // Draw button background
     glColor3f(bgColor.x, bgColor.y, bgColor.z);
     glBegin(GL_QUADS);
-    glVertex2i(mPosition.x, mPosition.y);
-    glVertex2i(mPosition.x + mSize.x, mPosition.y);
-    glVertex2i(mPosition.x + mSize.x, mPosition.y + mSize.y);
-    glVertex2i(mPosition.x, mPosition.y + mSize.y);
+        glVertex2i(mPosition.x, mPosition.y);
+        glVertex2i(mPosition.x + mSize.x, mPosition.y);
+        glVertex2i(mPosition.x + mSize.x, mPosition.y + mSize.y);
+        glVertex2i(mPosition.x, mPosition.y + mSize.y);
     glEnd();
 
-    // PERFECT CENTERING CALCULATION
+    // Draw text label in center
+    glColor3f(mTextColor.x, mTextColor.y, mTextColor.z);
+
+    void* font = GLUT_BITMAP_HELVETICA_18; // Choose appropriate font
+
     int textWidth = 0;
-    for (const char& c : mLabel) {
-        textWidth += glutBitmapWidth(GLUT_BITMAP_HELVETICA_18, c);
+    for (char c : mLabel) {
+        textWidth += glutBitmapWidth(font, c);
     }
 
-    // Horizontal center
+    int textHeight = 18; // Approx height of HELVETICA_18
+
     int textX = mPosition.x + (mSize.x - textWidth) / 2;
+    int textY = mPosition.y + (mSize.y - textHeight) / 2 + 4; // +4 offset for vertical visual balance
 
-    // Vertical center (key fix)
-    int fontHeight = 12; // GLUT_BITMAP_HELVETICA_18 is actually 12px tall
-    int textY = mPosition.y + (mSize.y / 2) + (fontHeight / 2) - 2; // -2 is the magic number
-
-    // Draw text with outline
-    glColor3f(0.0f, 0.0f, 0.0f); // Black outline
-    glRasterPos2i(textX + 1, textY - 1);
-    for (const char& c : mLabel) {
-        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
-    }
-
-    // Main text (white)
-    glColor3f(1.0f, 1.0f, 1.0f);
     glRasterPos2i(textX, textY);
-    for (const char& c : mLabel) {
-        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
+    for (char c : mLabel) {
+        glutBitmapCharacter(font, c);
     }
-
-    glPopAttrib();
 }
+
 
 bool Button::IsPointInside(int x, int y) const
 {

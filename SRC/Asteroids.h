@@ -51,6 +51,16 @@ public:
 	// Override the default implementation of ITimerListener ////////////////////
 	void OnTimer(int value);
 
+	// GUI
+	void CreateGUI();
+
+	// Menu
+	void CreateMenu();
+	void ShowMenu();
+	void HideMenu();
+
+	void DrawMenuBackground();
+
 private:
 	shared_ptr<Spaceship> mSpaceship;
 	shared_ptr<GUILabel> mScoreLabel;
@@ -72,16 +82,6 @@ private:
 	shared_ptr<GameObject> CreateSpaceship();
 	
 	virtual void OnButtonClick(Button* button);
-
-	// GUI
-	void CreateGUI();
-
-	// Menu
-	void CreateMenu();
-	void ShowMenu();
-	void HideMenu();
-
-	void DrawMenuBackground();
 
 	// to start fighting the astroids
 	void StartGame();
