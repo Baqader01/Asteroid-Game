@@ -51,7 +51,7 @@ public:
 private:
 	int mLives;
 
-	typedef std::list< shared_ptr<IPlayerListener> > PlayerListenerList;
+	typedef list< shared_ptr<IPlayerListener> > PlayerListenerList;
 
 	PlayerListenerList mListeners;
 };

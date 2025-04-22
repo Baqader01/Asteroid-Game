@@ -6,11 +6,16 @@
 class Asteroid : public GameObject
 {
 public:
-	Asteroid(void);
+	Asteroid(bool isMenuAsteroid = false);
 	~Asteroid(void);
 
 	bool CollisionTest(shared_ptr<GameObject> o);
 	void OnCollision(const GameObjectList& objects);
+
+	bool IsMenuAsteroid() const { return mIsMenuAsteroid; }
+
+private:
+	bool mIsMenuAsteroid;
 };
 
 #endif

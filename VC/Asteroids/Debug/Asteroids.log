@@ -1,11 +1,6 @@
 ﻿cl : command line  warning D9035: option 'Gm' has been deprecated and will be removed in a future release
   Asteroids.cpp
 Asteroid.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/SAFESEH' specification
-Spaceship.obj : warning LNK4204: '' is missing debugging information for referencing module; linking object as if no debug info
-Explosion.obj : warning LNK4204: '' is missing debugging information for referencing module; linking object as if no debug info
-Button.obj : warning LNK4204: '' is missing debugging information for referencing module; linking object as if no debug info
-Bullet.obj : warning LNK4204: '' is missing debugging information for referencing module; linking object as if no debug info
-Asteroid.obj : warning LNK4204: '' is missing debugging information for referencing module; linking object as if no debug info
   Asteroids.vcxproj -> C:\Users\smbaq\Documents\GitHub\Asteroid-Game\bin\Asteroids.exe
   ..\..\assets\asteroid.shape
   ..\..\assets\asteroid1_fs.png

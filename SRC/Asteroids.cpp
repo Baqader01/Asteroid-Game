@@ -6,6 +6,7 @@
 #include "GameWindow.h"
 #include "GameWorld.h"
 #include "GameDisplay.h"
+#include "GameSession.h"
 #include "Spaceship.h"
 #include "BoundingShape.h"
 #include "BoundingSphere.h"
@@ -21,6 +22,9 @@ Asteroids::Asteroids(int argc, char* argv[])
 {
 	mLevel = 0;
 	mAsteroidCount = 0;
+	mInMenu = true;
+	mScreenWidth = 700; 
+	mScreenHeight = 600;
 }
 
 /** Destructor. */
@@ -33,7 +37,11 @@ Asteroids::~Asteroids(void)
 /** Start an asteroids game. */
 void Asteroids::Start()
 {
+	InitializeResources();
+
+	mInMenu = true;
 	CreateMenu();
+
 	// Start the game
 	GameSession::Start();
 }
@@ -95,16 +103,19 @@ void Asteroids::OnSpecialKeyReleased(int key, int x, int y)
 
 void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 {
-	if (object->GetType() == GameObjectType("Asteroid"))
-	{
-		shared_ptr<GameObject> explosion = CreateExplosion();
-		explosion->SetPosition(object->GetPosition());
-		explosion->SetRotation(object->GetRotation());
-		mGameWorld->AddObject(explosion);
-		mAsteroidCount--;
-		if (mAsteroidCount <= 0) 
-		{ 
-			SetTimer(500, START_NEXT_LEVEL); 
+	if (object->GetType() == GameObjectType("Asteroid")) {
+		auto asteroid = dynamic_pointer_cast<Asteroid>(object);
+		if (asteroid && !asteroid->IsMenuAsteroid()) {
+			// Only process game asteroids
+			shared_ptr<GameObject> explosion = CreateExplosion();
+			explosion->SetPosition(object->GetPosition());
+			explosion->SetRotation(object->GetRotation());
+			mGameWorld->AddObject(explosion);
+			mAsteroidCount--;
+
+			if (mAsteroidCount <= 0) {
+				SetTimer(500, START_NEXT_LEVEL);
+			}
 		}
 	}
 }
@@ -123,7 +134,7 @@ void Asteroids::OnTimer(int value)
 	{
 		mLevel++;
 		int num_asteroids = 10 + 2 * mLevel;
-		CreateAsteroids(num_asteroids);
+		CreateAsteroids(num_asteroids, false);
 	}
 
 	if (value == SHOW_GAME_OVER)
@@ -179,15 +190,8 @@ void Asteroids::StartGame()
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse_light);
 	glEnable(GL_LIGHT0);
 
-	Animation* explosion_anim = AnimationManager::GetInstance().CreateAnimationFromFile("explosion", 64, 1024, 64, 64, "explosion_fs.png");
-	Animation* asteroid1_anim = AnimationManager::GetInstance().CreateAnimationFromFile("asteroid1", 128, 8192, 128, 128, "asteroid1_fs.png");
-	Animation* spaceship_anim = AnimationManager::GetInstance().CreateAnimationFromFile("spaceship", 128, 128, 128, 128, "spaceship_fs.png");
-
 	//Create the GUI
 	CreateGUI();
-
-	// Clear any existing objects
-	//mGameWorld->ClearObjects();
 
 	// Add a score keeper to the game world
 	mGameWorld->AddListener(&mScoreKeeper);
@@ -199,7 +203,7 @@ void Asteroids::StartGame()
 	mGameWorld->AddObject(CreateSpaceship());
 
 	// Create initial asteroids
-	CreateAsteroids(10);
+	CreateAsteroids(10, false);
 
 	// Reset game state
 	mLevel = 0;
@@ -217,20 +221,52 @@ void Asteroids::StartGame()
 
 }
 
-void Asteroids::CreateAsteroids(const uint num_asteroids)
+void Asteroids::CreateAsteroids(int count, bool forMenu)
 {
-	mAsteroidCount = num_asteroids;
-	for (uint i = 0; i < num_asteroids; i++)
-	{
-		Animation *anim_ptr = AnimationManager::GetInstance().GetAnimationByName("asteroid1");
-		shared_ptr<Sprite> asteroid_sprite
-			= make_shared<Sprite>(anim_ptr->GetWidth(), anim_ptr->GetHeight(), anim_ptr);
-		asteroid_sprite->SetLoopAnimation(true);
-		shared_ptr<GameObject> asteroid = make_shared<Asteroid>();
-		asteroid->SetBoundingShape(make_shared<BoundingSphere>(asteroid->GetThisPtr(), 10.0f));
-		asteroid->SetSprite(asteroid_sprite);
+	InitializeResources();
+	Animation* anim = AnimationManager::GetInstance().GetAnimationByName("asteroid1");
+	if (!anim) return;
+
+	for (int i = 0; i < count; i++) {
+		try {
+			auto asteroid = make_shared<Asteroid>(forMenu); // Pass menu flag
+
+			asteroid->SetBoundingShape(make_shared<BoundingSphere>(asteroid->GetThisPtr(), 10.0f));
+			auto sprite = make_shared<Sprite>(anim->GetWidth(), anim->GetHeight(), anim);
+			asteroid->SetSprite(sprite);
+			asteroid->SetScale(0.2f);
+
+			// Add to game world both menu and game asteroids
+			mGameWorld->AddObject(asteroid);
+
+			if (!forMenu) {
+				mAsteroidCount++; // Only count game asteroids
+			}
+		}
+		catch (...) {
+			cerr << "Error creating asteroid" << endl;
+		}
+	}
+}
+
+void Asteroids::CreateMenuAsteroids(int count)
+{
+	Animation* anim = AnimationManager::GetInstance().GetAnimationByName("asteroid1");
+	if (!anim) return;
+
+	for (int i = 0; i < count; i++) {
+		auto asteroid = make_shared<GameObject>("Asteroid");
+
+		// Visual setup only
+		auto sprite = make_shared<Sprite>(anim->GetWidth(), anim->GetHeight(), anim);
+		asteroid->SetSprite(sprite);
 		asteroid->SetScale(0.2f);
-		mGameWorld->AddObject(asteroid);
+
+		// Random position and slow movement
+		asteroid->SetPosition(GLVector3f(rand() % 100 - 50, rand() % 100 - 50, 0));
+		asteroid->SetVelocity(GLVector3f(rand() % 3 - 1.5f, rand() % 3 - 1.5f, 0));
+
+		mMenuAsteroids.push_back(asteroid);
 	}
 }
 
@@ -300,52 +336,108 @@ void Asteroids::DrawMenuBackground()
 // my function
 void Asteroids::CreateMenu()
 {
-	//DrawMenuBackground();
-
-	// Create Start button
-	mStartButton = make_shared<Button>("Start Game");
-	mStartButton->SetSize(GLVector2i(200, 50));
-	mStartButton->SetClickListener([this]() {
-		StartGame();
-		HideMenu();
-		});
-
-	// Register with window
-	mGameWindow->AddMouseListener(mStartButton);
-	mButtons.push_back(mStartButton);
-
-	// Create other menu buttons (Help, Exit, etc.)
-	auto helpBtn = std::make_shared<Button>("Help");
-	helpBtn->SetSize(GLVector2i(200, 50));
-	helpBtn->SetClickListener([this]() {  }); //i havent implemented it yet
-	mButtons.push_back(helpBtn);
-
-	// Position and add buttons to display
-	float yPos = 0.8f;
-	for (auto& btn : mButtons) {
-		mGameDisplay->GetContainer()->AddComponent(
-			std::static_pointer_cast<GUIComponent>(btn),
-			GLVector2f(0.35f, yPos));
-		yPos -= 0.10f; // Stack buttons vertically
-	}
-}
-
-void Asteroids::ShowMenu()
-{
-	mCurrentState = ::GameState::MENU;
-	for (auto& btn : mButtons) {
-		btn->SetVisible(true);
-	}
-	// Hide game elements if needed
-	mGameOverLabel->SetVisible(false);
-}
-
-void Asteroids::HideMenu()
-{
+	// Clear any existing buttons
 	for (auto& button : mButtons) {
 		mGameWindow->RemoveMouseListener(button);
 	}
 	mButtons.clear();
+
+	// create new astroids for menu
+	CreateAsteroids(12, true);
+
+	// Create Start button
+	auto startBtn = make_shared<Button>("Start Game");
+	startBtn->SetSize(GLVector2i(200, 50));
+	startBtn->SetClickListener([this]() {
+		StartGame();
+		});
+	mButtons.push_back(startBtn);
+
+	// Create Difficulty button
+	auto difficultyBtn = make_shared<Button>("Difficulty");
+	difficultyBtn->SetSize(GLVector2i(200, 50));
+	difficultyBtn->SetClickListener([this]() {
+		// Will implement later
+		});
+	mButtons.push_back(difficultyBtn);
+
+	// Create Instructions button
+	auto instructionsBtn = make_shared<Button>("Instructions");
+	instructionsBtn->SetSize(GLVector2i(200, 50));
+	instructionsBtn->SetClickListener([this]() {
+		// Will implement later
+		});
+	mButtons.push_back(instructionsBtn);
+
+	// Create High Scores button
+	auto highscoresBtn = make_shared<Button>("High Scores");
+	highscoresBtn->SetSize(GLVector2i(200, 50));
+	highscoresBtn->SetClickListener([this]() {
+		// Will implement later
+		});
+	mButtons.push_back(highscoresBtn);
+
+	// Position and add buttons to display
+	float yPos = 0.7f;  // Start a bit lower to make space for title
+	for (auto& btn : mButtons) {
+		mGameDisplay->GetContainer()->AddComponent(
+			static_pointer_cast<GUIComponent>(btn),
+			GLVector2f(0.35f, yPos));
+		mGameWindow->AddMouseListener(btn);
+		yPos -= 0.12f;  // Slightly more spacing between buttons
+	}
+
+	/*DrawMenuTitle();*/
+}
+
+
+void Asteroids::InitializeResources()
+{
+	// Load animations if they haven't been loaded yet
+	static bool resourcesInitialized = false;
+	if (!resourcesInitialized) {
+		AnimationManager::GetInstance().CreateAnimationFromFile("explosion", 64, 1024, 64, 64, "explosion_fs.png");
+		AnimationManager::GetInstance().CreateAnimationFromFile("asteroid1", 128, 8192, 128, 128, "asteroid1_fs.png");
+		AnimationManager::GetInstance().CreateAnimationFromFile("spaceship", 128, 128, 128, 128, "spaceship_fs.png");
+		resourcesInitialized = true;
+	}
+}
+
+void Asteroids::DrawMenuTitle()
+{
+	const char* title = "ASTEROIDS";
+	glColor3f(0.0f, 1.0f, 0.0f); // Green
+
+	// Calculate title width
+	int titleWidth = 0;
+	for (const char* c = title; *c; c++) {
+		titleWidth += glutBitmapWidth(GLUT_BITMAP_HELVETICA_18, *c);
+	}
+
+	// Center the title above buttons
+	glRasterPos2i((mScreenWidth - titleWidth) / 2, mScreenHeight * 0.8f);
+	for (const char* c = title; *c; c++) {
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
+	}
+}
+
+void Asteroids::HideMenu()
+{
+    for (auto& button : mButtons) {
+        button->SetActive(false);
+        button->SetVisible(false);
+    }
+
+	// Remove menu asteroids
+	mMenuAsteroids.clear();
+}
+
+void Asteroids::ShowMenu()
+{
+    for (auto& button : mButtons) {
+        button->SetActive(true);
+        button->SetVisible(true);
+    }
 }
 
 void Asteroids::OnButtonClick(Button* button)
@@ -358,10 +450,10 @@ void Asteroids::OnButtonClick(Button* button)
 void Asteroids::OnScoreChanged(int score)
 {
 	// Format the score message using an string-based stream
-	std::ostringstream msg_stream;
+	ostringstream msg_stream;
 	msg_stream << "Score: " << score;
 	// Get the score message as a string
-	std::string score_msg = msg_stream.str();
+	string score_msg = msg_stream.str();
 	mScoreLabel->SetText(score_msg);
 }
 
@@ -373,10 +465,10 @@ void Asteroids::OnPlayerKilled(int lives_left)
 	mGameWorld->AddObject(explosion);
 
 	// Format the lives left message using an string-based stream
-	std::ostringstream msg_stream;
+	ostringstream msg_stream;
 	msg_stream << "Lives: " << lives_left;
 	// Get the lives left message as a string
-	std::string lives_msg = msg_stream.str();
+	string lives_msg = msg_stream.str();
 	mLivesLabel->SetText(lives_msg);
 
 	if (lives_left > 0) 

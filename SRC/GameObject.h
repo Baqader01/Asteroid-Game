@@ -63,6 +63,8 @@ public:
 
 	shared_ptr<GameObject> GetThisPtr() { return shared_from_this(); }
 
+	shared_ptr<Sprite> GetSprite() { return mSprite; }
+
 protected:
 	GameObjectType mType;
 

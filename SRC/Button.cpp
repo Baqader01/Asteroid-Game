@@ -3,8 +3,8 @@
 #include <GL/glut.h>
 #include <iostream>
 
-Button::Button(const std::string& label)
-    : mLabel(label), mClickCallback(nullptr)
+Button::Button(const string& label)
+    : mLabel(label), mClickCallback(nullptr), mActive(true)
 {
     // Set default button size
     mSize = GLVector2i(200, 40); // More standard button size
@@ -69,6 +69,7 @@ bool Button::IsPointInside(int x, int y) const
 
 void Button::OnMouseClick(int button, int state, int x, int y)
 {
+    if (!mActive) return;
     if (button != GLUT_LEFT_BUTTON) return;
 
     bool inside = IsPointInside(x, y);

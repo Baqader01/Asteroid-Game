@@ -9,18 +9,20 @@
 class Button : public GUIComponent, public IMouseListener
 {
 public:
-    Button(const std::string& label = "");
+    Button(const string& label);
     virtual ~Button();
+
+     void SetActive(bool active) { mActive = active; }
 
     virtual void Draw() override;
 
-    void SetLabel(const std::string& label) { mLabel = label; }
-    std::string GetLabel() const { return mLabel; }
+    void SetLabel(const string& label) { mLabel = label; }
+    string GetLabel() const { return mLabel; }
 
     void SetHorizontalAlignment(GUIHorizontalAlignment alignment);
     void SetVerticalAlignment(GUIVerticalAlignment alignment);
 
-    void SetClickListener(std::function<void()> callback) { mClickCallback = callback; }
+    void SetClickListener(function<void()> callback) { mClickCallback = callback; }
 
     // IMouseListener implementation
     void OnMouseClick(int b, int state, int x, int y) override;
@@ -41,9 +43,10 @@ public:
 protected:
 
     bool IsPointInside(int x, int y) const;
+    bool mActive;
 
-    std::string mLabel;
-    std::function<void()> mClickCallback;
+    string mLabel;
+    function<void()> mClickCallback;
 
     int mScreenHeight = 600;
     int mScreenWidth = 800;

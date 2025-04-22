@@ -26,6 +26,9 @@ public:
 
 	virtual void Start(void);
 	virtual void Stop(void);
+
+	void CreateAsteroids(int count, bool forMenu);
+	void CreateMenuAsteroids(int count);
 	
 	// Declaration of IKeyboardListener interface ////////////////////////////////
 
@@ -54,8 +57,11 @@ public:
 	// GUI
 	void CreateGUI();
 
+	void InitializeResources();
+
 	// Menu
 	void CreateMenu();
+	void DrawMenuTitle();
 	void ShowMenu();
 	void HideMenu();
 
@@ -70,10 +76,19 @@ private:
 	shared_ptr<Button> mHelpButton;
 
 	vector<shared_ptr<Button>> mButtons;
+	vector<shared_ptr<GameObject>> mMenuAsteroids;
+	vector<shared_ptr<GameObject>> mAsteroids;
+
+
+	bool mInMenu;
+
+	int mScreenWidth;
+	int mScreenHeight;
+
 	vector<shared_ptr<IMouseListener>> mMouseListeners;
 
 	enum class GameState { MENU, PLAYING, GAME_OVER };
-	::GameState mCurrentState = ::GameState::MENU; 
+	GameState mCurrentState = GameState::MENU; 
 
 	uint mLevel;
 	uint mAsteroidCount;
@@ -86,7 +101,6 @@ private:
 	// to start fighting the astroids
 	void StartGame();
 
-	void CreateAsteroids(const uint num_asteroids);
 	shared_ptr<GameObject> CreateExplosion();
 
 	// Screen dimensions
