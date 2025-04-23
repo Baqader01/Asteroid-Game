@@ -174,6 +174,12 @@ void Asteroids::StartGame()
 	// i want the game to start here instead of start, so i can put the main menu over there
 	HideMenu();
 
+	// Clear all menu asteroids
+	for (auto& asteroid : mMenuAsteroids) {
+		mGameWorld->RemoveObject(asteroid);
+	}
+	mMenuAsteroids.clear();
+
 	// Create a shared pointer for the Asteroids game object - DO NOT REMOVE
 	shared_ptr<Asteroids> thisPtr = shared_ptr<Asteroids>(this);
 
@@ -234,45 +240,15 @@ void Asteroids::CreateAsteroids(int count, bool forMenu)
 		asteroid->SetSprite(sprite);
 		asteroid->SetScale(0.2f);
 
-		// Set random position and velocity
-		GLVector3f position(rand() % mScreenWidth - mScreenWidth / 2,
-			rand() % mScreenHeight - mScreenHeight / 2,
-			0);
-		GLVector3f velocity(rand() % 3 - 1.5f, rand() % 3 - 1.5f, 0);
-
-		asteroid->SetPosition(position);
-		asteroid->SetVelocity(velocity);
-
 		mGameWorld->AddObject(asteroid);
 
-		if (!forMenu) {
-			mAsteroidCount++;
+		if (forMenu) {
+			mMenuAsteroids.push_back(asteroid); // Add to menu container
 		}
 		else {
-			// Store menu asteroids separately if needed
-			mMenuAsteroids.push_back(asteroid);
+			mGameWorld->AddObject(asteroid);    // Add to game world
+			mAsteroidCount++;
 		}
-	}
-}
-
-void Asteroids::CreateMenuAsteroids(int count)
-{
-	Animation* anim = AnimationManager::GetInstance().GetAnimationByName("asteroid1");
-	if (!anim) return;
-
-	for (int i = 0; i < count; i++) {
-		auto asteroid = make_shared<GameObject>("Asteroid");
-
-		// Visual setup only
-		auto sprite = make_shared<Sprite>(anim->GetWidth(), anim->GetHeight(), anim);
-		asteroid->SetSprite(sprite);
-		asteroid->SetScale(0.2f);
-
-		// Random position and slow movement
-		asteroid->SetPosition(GLVector3f(rand() % 100 - 50, rand() % 100 - 50, 0));
-		asteroid->SetVelocity(GLVector3f(rand() % 3 - 1.5f, rand() % 3 - 1.5f, 0));
-
-		mMenuAsteroids.push_back(asteroid);
 	}
 }
 
@@ -444,9 +420,6 @@ void Asteroids::HideMenu()
         button->SetActive(false);
         button->SetVisible(false);
     }
-
-	// Remove menu asteroids
-	mMenuAsteroids.clear();
 }
 
 void Asteroids::ShowMenu()

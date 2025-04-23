@@ -28,7 +28,7 @@ public:
 	virtual void Stop(void);
 
 	void CreateAsteroids(int count, bool forMenu);
-	void CreateMenuAsteroids(int count);
+	void DeleteAllAsteroids();
 	
 	// Declaration of IKeyboardListener interface ////////////////////////////////
 
@@ -78,7 +78,9 @@ private:
 	shared_ptr<Button> mHelpButton;
 
 	vector<shared_ptr<Button>> mButtons;
+
 	vector<shared_ptr<GameObject>> mMenuAsteroids;
+	vector<shared_ptr<GameObject>> mGameAsteroids;
 	vector<shared_ptr<GameObject>> mAsteroids;
 
 
@@ -105,13 +107,9 @@ private:
 
 	shared_ptr<GameObject> CreateExplosion();
 
-	// Screen dimensions
+	// button dimensions
 	GLVector2f screenSize = GLVector2f(800.0f, 600.0f);
-
-	// Button dimensions
 	GLVector2f buttonSize = GLVector2f(200.0f, 50.0f);
-
-	// Position calculation (top center)
 	GLVector2f buttonPos = GLVector2f(screenSize.x / 2, screenSize.y * 0.2f);
 
 	const static uint SHOW_GAME_OVER = 0;
