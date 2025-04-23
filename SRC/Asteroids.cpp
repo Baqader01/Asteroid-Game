@@ -228,23 +228,29 @@ void Asteroids::CreateAsteroids(int count, bool forMenu)
 	if (!anim) return;
 
 	for (int i = 0; i < count; i++) {
-		try {
-			auto asteroid = make_shared<Asteroid>(forMenu); // Pass menu flag
+		auto asteroid = make_shared<Asteroid>(forMenu);
+		asteroid->SetBoundingShape(make_shared<BoundingSphere>(asteroid->GetThisPtr(), 10.0f));
+		auto sprite = make_shared<Sprite>(anim->GetWidth(), anim->GetHeight(), anim);
+		asteroid->SetSprite(sprite);
+		asteroid->SetScale(0.2f);
 
-			asteroid->SetBoundingShape(make_shared<BoundingSphere>(asteroid->GetThisPtr(), 10.0f));
-			auto sprite = make_shared<Sprite>(anim->GetWidth(), anim->GetHeight(), anim);
-			asteroid->SetSprite(sprite);
-			asteroid->SetScale(0.2f);
+		// Set random position and velocity
+		GLVector3f position(rand() % mScreenWidth - mScreenWidth / 2,
+			rand() % mScreenHeight - mScreenHeight / 2,
+			0);
+		GLVector3f velocity(rand() % 3 - 1.5f, rand() % 3 - 1.5f, 0);
 
-			// Add to game world both menu and game asteroids
-			mGameWorld->AddObject(asteroid);
+		asteroid->SetPosition(position);
+		asteroid->SetVelocity(velocity);
 
-			if (!forMenu) {
-				mAsteroidCount++; // Only count game asteroids
-			}
+		mGameWorld->AddObject(asteroid);
+
+		if (!forMenu) {
+			mAsteroidCount++;
 		}
-		catch (...) {
-			cerr << "Error creating asteroid" << endl;
+		else {
+			// Store menu asteroids separately if needed
+			mMenuAsteroids.push_back(asteroid);
 		}
 	}
 }

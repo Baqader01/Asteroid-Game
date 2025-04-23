@@ -19,13 +19,8 @@ GameWorld::~GameWorld(void)
 /** Update the world. */
 void GameWorld::Update(int t)
 {
-	if (mCurrentState == GameState::MENU) {
-		/*UpdateMenu(t);*/
-	}
-	else {
-		UpdateObjects(t);
-		UpdateCollisions(t);
-	}
+	UpdateObjects(t);
+	UpdateCollisions(t);
 
 	// Remove objects flagged for removal
 	WeakGameObjectList::iterator it = mGameObjectsToRemove.begin();
@@ -42,30 +37,28 @@ void GameWorld::Update(int t)
 /** Render the world by rendering all of its objects. */
 void GameWorld::Render(void)
 {
-	if (mCurrentState == GameState::MENU) {
-		//RenderMenu();
-	}
-	else {
-		// Update the projection matrix
-		glMatrixMode(GL_PROJECTION);
-		// Store the current projection matrix
-		glPushMatrix();
-		// Initialize the projection matrix to the identity matrix
-		glLoadIdentity();
-		// Set orthographic projection to include the world
-		glOrtho(-mWidth / 2, mWidth / 2, -mHeight / 2, mHeight / 2, -100, 100);
+	// Update the projection matrix
+	glMatrixMode(GL_PROJECTION);
+	// Store the current projection matrix
+	glPushMatrix();
+	// Initialize the projection matrix to the identity matrix
+	glLoadIdentity();
+	// Set orthographic projection to include the world
+	glOrtho(-mWidth / 2, mWidth / 2, -mHeight / 2, mHeight / 2, -100, 100);
 
-		// Switch to model mode ready for rendering
-		glMatrixMode(GL_MODELVIEW);
-		// Initialize the projection matrix to the identity matrix
-		glLoadIdentity();
-		// Render every object in the world
-		for (GameObjectList::iterator it = mGameObjects.begin(); it != mGameObjects.end(); ++it) {
-			(*it)->PreRender();
-			(*it)->Render();
-			(*it)->PostRender();
-		}
+	// Switch to model mode ready for rendering
+	glMatrixMode(GL_MODELVIEW);
+	// Initialize the projection matrix to the identity matrix
+	glLoadIdentity();
+	// Render every object in the world
+	for (GameObjectList::iterator it = mGameObjects.begin(); it != mGameObjects.end(); ++it) {
+		(*it)->PreRender();
+		(*it)->Render();
+		(*it)->PostRender();
 	}
+
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
 }
 
 /** Add a game object to the world. */
