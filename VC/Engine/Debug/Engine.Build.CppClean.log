@@ -3,6 +3,7 @@ c:\users\smbaq\documents\github\asteroid-game\lib\engine.idb
 c:\users\smbaq\documents\github\asteroid-game\vc\engine\debug\gamedisplay.obj
 c:\users\smbaq\documents\github\asteroid-game\vc\engine\debug\gameobject.obj
 c:\users\smbaq\documents\github\asteroid-game\vc\engine\debug\gameobjecttype.obj
+c:\users\smbaq\documents\github\asteroid-game\vc\engine\debug\gamesession.obj
 c:\users\smbaq\documents\github\asteroid-game\vc\engine\debug\gamewindow.obj
 c:\users\smbaq\documents\github\asteroid-game\vc\engine\debug\gameworld.obj
 c:\users\smbaq\documents\github\asteroid-game\vc\engine\debug\glutsession.obj
@@ -21,7 +22,6 @@ c:\users\smbaq\documents\github\asteroid-game\vc\engine\debug\texture.obj
 c:\users\smbaq\documents\github\asteroid-game\vc\engine\debug\texturemanager.obj
 c:\users\smbaq\documents\github\asteroid-game\vc\engine\debug\animation.obj
 c:\users\smbaq\documents\github\asteroid-game\vc\engine\debug\animationmanager.obj
-c:\users\smbaq\documents\github\asteroid-game\vc\engine\debug\gamesession.obj
 c:\users\smbaq\documents\github\asteroid-game\lib\engine.lib
 c:\users\smbaq\documents\github\asteroid-game\vc\asteroids\debug\..\..\..\lib\engine.pdb
 c:\users\smbaq\documents\github\asteroid-game\vc\engine\debug\engine.tlog\cl.command.1.tlog

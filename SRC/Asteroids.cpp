@@ -342,58 +342,69 @@ void Asteroids::DrawMenuBackground()
 // my function
 void Asteroids::CreateMenu()
 {
-	// Clear any existing buttons
+	// Clear existing buttons
 	for (auto& button : mButtons) {
 		mGameWindow->RemoveMouseListener(button);
 	}
 	mButtons.clear();
 
-	// create new astroids for menu
+	// Create menu asteroids
 	CreateAsteroids(12, true);
 
-	// Create Start button
-	auto startBtn = make_shared<Button>("Start Game");
-	startBtn->SetSize(GLVector2i(200, 50));
-	startBtn->SetClickListener([this]() {
-		StartGame();
-		});
-	mButtons.push_back(startBtn);
+	// Create buttons
+	mButtons.push_back(make_shared<Button>("Start Game"));
+	mButtons.push_back(make_shared<Button>("Difficulty"));
+	mButtons.push_back(make_shared<Button>("Instructions"));
+	mButtons.push_back(make_shared<Button>("High Scores"));
 
-	// Create Difficulty button
-	auto difficultyBtn = make_shared<Button>("Difficulty");
-	difficultyBtn->SetSize(GLVector2i(200, 50));
-	difficultyBtn->SetClickListener([this]() {
-		// Will implement later
-		});
-	mButtons.push_back(difficultyBtn);
+	// Set button click handlers
+	mButtons[0]->SetClickListener([this]() { StartGame(); });
+	//add implementations
 
-	// Create Instructions button
-	auto instructionsBtn = make_shared<Button>("Instructions");
-	instructionsBtn->SetSize(GLVector2i(200, 50));
-	instructionsBtn->SetClickListener([this]() {
-		// Will implement later
-		});
-	mButtons.push_back(instructionsBtn);
+	// Initial layout
+	UpdateButtonLayout();
 
-	// Create High Scores button
-	auto highscoresBtn = make_shared<Button>("High Scores");
-	highscoresBtn->SetSize(GLVector2i(200, 50));
-	highscoresBtn->SetClickListener([this]() {
-		// Will implement later
+	// Add resize handler (using lambda directly)
+	mGameWindow->AddResizeCallback([this](int w, int h) {
+		mScreenWidth = w;
+		mScreenHeight = h;
+		UpdateButtonLayout();
 		});
-	mButtons.push_back(highscoresBtn);
+}
 
-	// Position and add buttons to display
-	float yPos = 0.7f;  // Start a bit lower to make space for title
+void Asteroids::UpdateButtonLayout()
+{
+	const float baseWidth = 800.0f;  // Original design width
+	const float baseHeight = 600.0f; // Original design height
+
+	// Calculate scale factors
+	float scaleX = mScreenWidth / baseWidth;
+	float scaleY = mScreenHeight / baseHeight;
+
+	// Calculate button size (300x50 at base size)
+	int buttonWidth = static_cast<int>(300 * scaleX);
+	int buttonHeight = static_cast<int>(50 * scaleY);
+
+	// Position buttons (starting at 70% down, spaced by 12%)
+	float yPos = 0.7f;
+	const float buttonSpacing = 0.12f;
+	const float xPos = ((baseWidth - 50) / 3) / baseWidth; // 35% from left
+
 	for (auto& btn : mButtons) {
+		btn->SetSize(GLVector2i(buttonWidth, buttonHeight));
+
+		// Update position
+		mGameDisplay->GetContainer()->RemoveComponent(static_pointer_cast<GUIComponent>(btn));
 		mGameDisplay->GetContainer()->AddComponent(
 			static_pointer_cast<GUIComponent>(btn),
-			GLVector2f(0.35f, yPos));
-		mGameWindow->AddMouseListener(btn);
-		yPos -= 0.12f;  // Slightly more spacing between buttons
-	}
+			GLVector2f(xPos, yPos));
 
-	/*DrawMenuTitle();*/
+		yPos -= buttonSpacing;
+
+		// Refresh mouse listener
+		mGameWindow->RemoveMouseListener(btn);
+		mGameWindow->AddMouseListener(btn);
+	}
 }
 
 

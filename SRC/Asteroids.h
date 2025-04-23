@@ -65,6 +65,8 @@ public:
 	void ShowMenu();
 	void HideMenu();
 
+	void UpdateButtonLayout();
+
 	void DrawMenuBackground();
 
 private:

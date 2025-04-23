@@ -61,6 +61,11 @@ void  GameWindow::OnWindowReshaped(int w, int h)
 	// Update the world and display to match
 	UpdateWorldSize();
 	UpdateDisplaySize();
+
+	// Call all registered resize callbacks
+	for (auto& callback : mResizeCallbacks) {
+		callback(w, h);
+	}
 }
    
 void GameWindow::SetWorld(GameWorld* w) { mWorld = w; UpdateWorldSize(); }
@@ -68,6 +73,16 @@ GameWorld* GameWindow::GetWorld() { return mWorld; }
 
 void GameWindow::SetDisplay(GameDisplay* d) { mDisplay = d; UpdateDisplaySize(); }
 GameDisplay* GameWindow::GetDisplay() { return mDisplay; }
+
+void GameWindow::AddResizeCallback(function<void(int, int)> callback)
+{
+	mResizeCallbacks.push_back(callback);
+}
+
+void GameWindow::ClearResizeCallbacks()
+{
+	mResizeCallbacks.clear();
+}
 
 //adding a mouse click
 //void GameWindow::OnMouseClick(int button, int state, int x, int y)

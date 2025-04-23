@@ -119,6 +119,7 @@
     <ClInclude Include="..\..\src\Bullet.h" />
     <ClInclude Include="..\..\SRC\Explosion.h" />
     <ClInclude Include="..\..\SRC\Button.h" />
+    <ClInclude Include="..\..\SRC\IResizeListener.h" />
     <ClInclude Include="..\..\SRC\Player.h" />
     <ClInclude Include="..\..\src\Spaceship.h" />
   </ItemGroup>
