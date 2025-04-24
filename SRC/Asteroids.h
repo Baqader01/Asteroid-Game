@@ -18,7 +18,7 @@ class Spaceship;
 class GUILabel;
 class GUIButton;
 
-class Asteroids : public GameSession, public IKeyboardListener, public IGameWorldListener, public IScoreListener, public IPlayerListener
+class Asteroids : public GameSession, public IKeyboardListener, public IGameWorldListener, public IScoreListener, public IPlayerListener, public enable_shared_from_this<Asteroids>
 {
 public:
 	Asteroids(int argc, char *argv[]);
@@ -28,7 +28,6 @@ public:
 	virtual void Stop(void);
 
 	void CreateAsteroids(int count, bool forMenu);
-	void DeleteAllAsteroids();
 	
 	// Declaration of IKeyboardListener interface ////////////////////////////////
 
@@ -65,6 +64,8 @@ public:
 	void ShowMenu();
 	void HideMenu();
 
+	void ShowInstructions();
+
 	void UpdateButtonLayout();
 
 	void DrawMenuBackground();
@@ -74,10 +75,12 @@ private:
 	shared_ptr<GUILabel> mScoreLabel;
 	shared_ptr<GUILabel> mLivesLabel;
 	shared_ptr<GUILabel> mGameOverLabel;
+	shared_ptr<GUILabel> mInstructionsLabel;
 	shared_ptr<Button> mStartButton;
 	shared_ptr<Button> mHelpButton;
 
 	vector<shared_ptr<Button>> mButtons;
+	vector<shared_ptr<GUILabel>> mInstructionLabels;
 
 	vector<shared_ptr<GameObject>> mMenuAsteroids;
 	vector<shared_ptr<GameObject>> mGameAsteroids;
@@ -85,6 +88,7 @@ private:
 
 
 	bool mInMenu;
+	bool mShowingInstructions;
 
 	int mScreenWidth;
 	int mScreenHeight;

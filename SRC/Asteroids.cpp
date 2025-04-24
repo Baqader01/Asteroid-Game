@@ -1,4 +1,4 @@
-#include "Asteroid.h"
+﻿#include "Asteroid.h"
 #include "Asteroids.h"
 #include "Animation.h"
 #include "AnimationManager.h"
@@ -56,11 +56,21 @@ void Asteroids::Stop()
 // PUBLIC INSTANCE METHODS IMPLEMENTING IKeyboardListener /////////////////////
 void Asteroids::OnKeyPressed(uchar key, int x, int y)
 {
+	if (mShowingInstructions) {
+		if (key == 'm' || key == 'M') {
+			mInstructionLabels.clear();
+			mShowingInstructions = false;
+			ShowMenu();
+			return;
+		}
+	}
+
 	switch (key)
 	{
 	case ' ':
 		mSpaceship->Shoot();
 		break;
+
 	default:
 		break;
 	}
@@ -335,6 +345,8 @@ void Asteroids::CreateMenu()
 
 	// Set button click handlers
 	mButtons[0]->SetClickListener([this]() { StartGame(); });
+	//mButtons[0]->SetClickListener([this]() { StartGame(); });
+	mButtons[2]->SetClickListener([this]() { ShowInstructions(); });
 	//add implementations
 
 	// Initial layout
@@ -346,6 +358,39 @@ void Asteroids::CreateMenu()
 		mScreenHeight = h;
 		UpdateButtonLayout();
 		});
+}
+
+void Asteroids::ShowInstructions() {
+	HideMenu();
+
+	vector<string> lines = {
+		"HOW TO PLAY",
+		"------------------",
+		"Movement:",
+		"↑ - Thrust Forward",
+		"← → - Rotate Ship",
+		"",
+		"Actions:",
+		"SPACE - Fire Laser",
+		"ESC - Return to Menu",
+		"",
+		"Objective:",
+		"Destroy all asteroids!",
+		"Avoid collisions.",
+		"",
+		"",
+	};
+
+	float yPos = 0.95f; // Start near top (5% padding)
+	for (const auto& line : lines) {
+		auto label = make_shared<GUILabel>(line);
+		label->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_LEFT);
+		mGameDisplay->GetContainer()->AddComponent(label, GLVector2f(0.05f, yPos)); // 5% from left
+		mInstructionLabels.push_back(label); // Store in vector
+		yPos -= 0.05f; // Move down 5% per line
+	}
+
+	mShowingInstructions = true;
 }
 
 void Asteroids::UpdateButtonLayout()
