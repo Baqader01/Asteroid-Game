@@ -1,19 +1,8 @@
 ﻿cl : command line  warning D9035: option 'Gm' has been deprecated and will be removed in a future release
-<<<<<<< HEAD
   Asteroids.cpp
-C:\Users\smbaq\Documents\GitHub\Asteroid-Game\src\Asteroids.cpp(407,3): warning C4566: character represented by universal-character-name '\u2191' cannot be represented in the current code page (1252)
-C:\Users\smbaq\Documents\GitHub\Asteroid-Game\src\Asteroids.cpp(408,3): warning C4566: character represented by universal-character-name '\u2190' cannot be represented in the current code page (1252)
-C:\Users\smbaq\Documents\GitHub\Asteroid-Game\src\Asteroids.cpp(408,3): warning C4566: character represented by universal-character-name '\u2192' cannot be represented in the current code page (1252)
-=======
-  Spaceship.cpp
-  main.cpp
-  Explosion.cpp
-  Button.cpp
-  Bullet.cpp
-  Asteroids.cpp
-  Asteroid.cpp
-  Generating Code...
->>>>>>> 5193e97c2709f36a334ec864200103962f3ff789
+C:\Users\smbaq\Documents\GitHub\Asteroid-Game\src\Asteroids.cpp(425,3): warning C4566: character represented by universal-character-name '\u2191' cannot be represented in the current code page (1252)
+C:\Users\smbaq\Documents\GitHub\Asteroid-Game\src\Asteroids.cpp(426,3): warning C4566: character represented by universal-character-name '\u2190' cannot be represented in the current code page (1252)
+C:\Users\smbaq\Documents\GitHub\Asteroid-Game\src\Asteroids.cpp(426,3): warning C4566: character represented by universal-character-name '\u2192' cannot be represented in the current code page (1252)
 Asteroid.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/SAFESEH' specification
   Asteroids.vcxproj -> C:\Users\smbaq\Documents\GitHub\Asteroid-Game\bin\Asteroids.exe
   ..\..\assets\asteroid.shape

@@ -29,10 +29,9 @@ public:
 	virtual void Stop(void);
 
 	void CreateAsteroids(int count, bool forMenu);
-<<<<<<< HEAD
-=======
 	void DeleteAllAsteroids();
->>>>>>> 5193e97c2709f36a334ec864200103962f3ff789
+
+	void SetupInputListeners();
 	
 	// Declaration of IKeyboardListener interface ////////////////////////////////
 
@@ -70,15 +69,10 @@ public:
 	void DrawMenuTitle();
 	void ShowMenu();
 	void HideMenu();
+	void UpdateButtonLayout();
 
-<<<<<<< HEAD
 	void ShowInstructions();
 
-	void UpdateButtonLayout();
-=======
-	void UpdateButtonLayout();
-
->>>>>>> 5193e97c2709f36a334ec864200103962f3ff789
 	void DrawMenuBackground();
 
 	bool HandleEscapeKey();
@@ -91,20 +85,15 @@ private:
 	shared_ptr<GUILabel> mInstructionsLabel;
 	shared_ptr<Button> mStartButton;
 	shared_ptr<Button> mHelpButton;
+	shared_ptr<Asteroids> mSelfPtr; // Prevents deletion while listening
 
 	vector<shared_ptr<Button>> mButtons;
-<<<<<<< HEAD
 	vector<shared_ptr<GUILabel>> mInstructionLabels;
 
 	vector<shared_ptr<GameObject>> mMenuAsteroids;
 	vector<shared_ptr<GameObject>> mGameAsteroids;
 	vector<shared_ptr<IMouseListener>> mMouseListeners;
-=======
 
-	vector<shared_ptr<GameObject>> mMenuAsteroids;
-	vector<shared_ptr<GameObject>> mGameAsteroids;
->>>>>>> 5193e97c2709f36a334ec864200103962f3ff789
-	vector<shared_ptr<GameObject>> mAsteroids;
 
 
 	bool mInMenu;
@@ -122,13 +111,13 @@ private:
 
 	void ResetSpaceship();
 	shared_ptr<GameObject> CreateSpaceship();
+	shared_ptr<GameObject> CreateExplosion();
 	
 	virtual void OnButtonClick(Button* button);
 
 	// to start fighting the astroids
 	void StartGame();
 
-	shared_ptr<GameObject> CreateExplosion();
 
 	// button dimensions
 	GLVector2f screenSize = GLVector2f(800.0f, 600.0f);

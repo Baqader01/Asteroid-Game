@@ -26,6 +26,8 @@ Asteroids::Asteroids(int argc, char* argv[])
 	mInMenu = true;
 	mScreenWidth = 700; 
 	mScreenHeight = 600;
+
+	SetupInputListeners();
 }
 
 /** Destructor. */
@@ -189,20 +191,10 @@ void Asteroids::StartGame()
 	// i want the game to start here instead of start, so i can put the main menu over there
 	HideMenu();
 
-	// Clear all menu asteroids
-	for (auto& asteroid : mMenuAsteroids) {
-		mGameWorld->RemoveObject(asteroid);
-	}
-	mMenuAsteroids.clear();
+	DeleteAllAsteroids();
 
 	// Create a shared pointer for the Asteroids game object - DO NOT REMOVE
 	shared_ptr<Asteroids> thisPtr = shared_ptr<Asteroids>(this);
-
-	// Add this class as a listener of the game world
-	mGameWorld->AddListener(thisPtr.get());
-
-	// Add this as a listener to the world and the keyboard
-	mGameWindow->AddKeyboardListener(thisPtr);
 
 	// Create an ambient light to show sprite textures
 	GLfloat ambient_light[] = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -265,6 +257,30 @@ void Asteroids::CreateAsteroids(int count, bool forMenu)
 			mAsteroidCount++;
 		}
 	}
+}
+
+void Asteroids::DeleteAllAsteroids()
+{
+	// Clear all menu asteroids
+	for (auto& asteroid : mMenuAsteroids) {
+		mGameWorld->RemoveObject(asteroid);
+	}
+	mMenuAsteroids.clear();
+}
+
+void Asteroids::SetupInputListeners()
+{
+	// Create shared_ptr to this 
+	shared_ptr<Asteroids> thisPtr = shared_ptr<Asteroids>(this);
+
+	// Add this class as a listener of the game world
+	mGameWorld->AddListener(thisPtr.get());
+
+	// Add this as a listener to the world and the keyboard
+	mGameWindow->AddKeyboardListener(thisPtr);
+
+	// Store the shared_ptr to prevent deletion
+	mSelfPtr = thisPtr;
 }
 
 void Asteroids::CreateGUI()
@@ -361,11 +377,8 @@ void Asteroids::CreateMenu()
 
 	// Set button click handlers
 	mButtons[0]->SetClickListener([this]() { StartGame(); });
-<<<<<<< HEAD
 	//mButtons[0]->SetClickListener([this]() { StartGame(); });
 	mButtons[2]->SetClickListener([this]() { ShowInstructions(); });
-=======
->>>>>>> 5193e97c2709f36a334ec864200103962f3ff789
 	//add implementations
 
 	// Initial layout
@@ -378,7 +391,6 @@ void Asteroids::CreateMenu()
 		UpdateButtonLayout();
 		});
 }
-<<<<<<< HEAD
 
 void Asteroids::ReturnToMenu()
 {
@@ -403,6 +415,8 @@ void Asteroids::ReturnToMenu()
 
 void Asteroids::ShowInstructions() {
 	HideMenu();
+
+	//DeleteAllAsteroids();
 
 	vector<string> lines = {
 		"HOW TO PLAY",
@@ -461,36 +475,6 @@ void Asteroids::UpdateButtonLayout()
 			static_pointer_cast<GUIComponent>(btn),
 			GLVector2f(xPos, yPos));
 
-=======
-
-void Asteroids::UpdateButtonLayout()
-{
-	const float baseWidth = 800.0f;  // Original design width
-	const float baseHeight = 600.0f; // Original design height
-
-	// Calculate scale factors
-	float scaleX = mScreenWidth / baseWidth;
-	float scaleY = mScreenHeight / baseHeight;
-
-	// Calculate button size (300x50 at base size)
-	int buttonWidth = static_cast<int>(300 * scaleX);
-	int buttonHeight = static_cast<int>(50 * scaleY);
-
-	// Position buttons (starting at 70% down, spaced by 12%)
-	float yPos = 0.7f;
-	const float buttonSpacing = 0.12f;
-	const float xPos = ((baseWidth - 50) / 3) / baseWidth; // 35% from left
-
-	for (auto& btn : mButtons) {
-		btn->SetSize(GLVector2i(buttonWidth, buttonHeight));
-
-		// Update position
-		mGameDisplay->GetContainer()->RemoveComponent(static_pointer_cast<GUIComponent>(btn));
-		mGameDisplay->GetContainer()->AddComponent(
-			static_pointer_cast<GUIComponent>(btn),
-			GLVector2f(xPos, yPos));
-
->>>>>>> 5193e97c2709f36a334ec864200103962f3ff789
 		yPos -= buttonSpacing;
 
 		// Refresh mouse listener

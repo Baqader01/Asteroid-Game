@@ -50,18 +50,8 @@ void GlutWindow::OnTimer(int value)
 
 void GlutWindow::OnKeyPressed(uchar key, int x, int y)
 {
-	// Special ESC key handling
+	// If the Esc key (code 27) has been pressed stop this session (exit program)
 	if (key == 27) {
-		for (auto& listener : mKeyboardListeners) {
-			// Safe dynamic cast
-			Asteroids* asteroidsGame = dynamic_cast<Asteroids*>(listener.get());
-			if (asteroidsGame) {
-				if (asteroidsGame->HandleEscapeKey()) {
-					return; // Handled by Asteroids
-				}
-			}
-		}
-		// Default ESC behavior
 		GlutSession::Stop();
 		return;
 	}
