@@ -43,7 +43,7 @@ public:
 	GLVector2i GetBorder() { return mBorder; }
 	
 	void SetVisible(bool visible) { mVisible = visible; }
-	bool GetVisible() { return mVisible; }
+	bool IsVisible() { return mVisible; }
 	
 	void SetColor(const GLVector3f& color) { mColor = color; }
 	GLVector3f GetColor() { return mColor; }

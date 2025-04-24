@@ -66,14 +66,17 @@ public:
 	void ReturnToMenu();
 
 	void CreateMenu();
+	void DeleteMenu();
 	void DrawMenuTitle();
 	void ShowMenu();
+	void CreateMenuButtons();
 	void HideMenu();
 	void UpdateButtonLayout();
+	void DrawMenuBackground();
 
 	void ShowInstructions();
+	void HideInstructions();
 
-	void DrawMenuBackground();
 
 	bool HandleEscapeKey();
 
@@ -93,8 +96,6 @@ private:
 	vector<shared_ptr<GameObject>> mMenuAsteroids;
 	vector<shared_ptr<GameObject>> mGameAsteroids;
 	vector<shared_ptr<IMouseListener>> mMouseListeners;
-
-
 
 	bool mInMenu;
 	bool mShowingInstructions;

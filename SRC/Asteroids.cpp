@@ -1,6 +1,5 @@
 ﻿#include "Asteroids.h"
 #include "Asteroid.h"
-#include "Asteroids.h"
 #include "Animation.h"
 #include "AnimationManager.h"
 #include "GameUtil.h"
@@ -13,6 +12,7 @@
 #include "BoundingSphere.h"
 #include "Button.h"
 #include "GUILabel.h"
+#include <Windows.h>
 #include "Explosion.h"
 
 // PUBLIC INSTANCE CONSTRUCTORS ///////////////////////////////////////////////
@@ -62,8 +62,8 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 	// Handle return to menu in any state
 	if (key == 'm' || key == 'M' || key == 27) { // 27 = ESC key
 		if (mShowingInstructions) {
-			mInstructionLabels.clear();
-			ShowMenu();
+			HideInstructions();
+			//this is the problem
 		}
 		else if (!mInMenu) {
 			// Return from game to menu
@@ -370,19 +370,7 @@ void Asteroids::CreateMenu()
 	CreateAsteroids(12, true);
 
 	// Create buttons
-	mButtons.push_back(make_shared<Button>("Start Game"));
-	mButtons.push_back(make_shared<Button>("Difficulty"));
-	mButtons.push_back(make_shared<Button>("Instructions"));
-	mButtons.push_back(make_shared<Button>("High Scores"));
-
-	// Set button click handlers
-	mButtons[0]->SetClickListener([this]() { StartGame(); });
-	//mButtons[0]->SetClickListener([this]() { StartGame(); });
-	mButtons[2]->SetClickListener([this]() { ShowInstructions(); });
-	//add implementations
-
-	// Initial layout
-	UpdateButtonLayout();
+	CreateMenuButtons();
 
 	// Add resize handler (using lambda directly)
 	mGameWindow->AddResizeCallback([this](int w, int h) {
@@ -390,6 +378,44 @@ void Asteroids::CreateMenu()
 		mScreenHeight = h;
 		UpdateButtonLayout();
 		});
+}
+
+void Asteroids::DeleteMenu()
+{
+	// Clear existing buttons
+	for (auto& button : mButtons) {
+		mGameWindow->RemoveMouseListener(button);
+	}
+	mButtons.clear();
+	mMenuAsteroids.clear();
+}
+
+void Asteroids::CreateMenuButtons()
+{
+	mButtons.clear();
+
+	// Create and configure buttons
+	auto startBtn = make_shared<Button>("Start Game");
+	auto difficultyBtn = make_shared<Button>("Difficulty");
+	auto instructionsBtn = make_shared<Button>("Instructions");
+	auto highscoresBtn = make_shared<Button>("High Scores");
+
+	// Set button click handlers
+	startBtn->SetClickListener([this]() { StartGame(); });
+	//difficultyBtn->SetClickListener([this]() { ShowDifficultyOptions(); });
+	instructionsBtn->SetClickListener([this]() { ShowInstructions(); });
+	//highscoresBtn->SetClickListener([this]() { ShowHighScores(); });
+
+	// Store buttons
+	mButtons = { startBtn, difficultyBtn, instructionsBtn, highscoresBtn };
+
+	// Set initial layout
+	UpdateButtonLayout();
+
+	// Register mouse listeners for all buttons
+	for (auto& btn : mButtons) {
+		mGameWindow->AddMouseListener(btn);
+	}
 }
 
 void Asteroids::ReturnToMenu()
@@ -448,6 +474,13 @@ void Asteroids::ShowInstructions() {
 	mShowingInstructions = true;
 }
 
+void Asteroids::HideInstructions() {
+	mShowingInstructions = false;
+	for (auto& label : mInstructionLabels) {
+		label->SetVisible(false);
+	}
+}
+
 void Asteroids::UpdateButtonLayout()
 {
 	const float baseWidth = 800.0f;  // Original design width
@@ -479,6 +512,7 @@ void Asteroids::UpdateButtonLayout()
 
 		// Refresh mouse listener
 		mGameWindow->RemoveMouseListener(btn);
+		mGameWindow->AddMouseListener(btn);
 		mGameWindow->AddMouseListener(btn);
 	}
 }
@@ -516,6 +550,8 @@ void Asteroids::DrawMenuTitle()
 
 void Asteroids::HideMenu()
 {
+	mInMenu = false;
+
     for (auto& button : mButtons) {
         button->SetActive(false);
         button->SetVisible(false);
@@ -524,10 +560,18 @@ void Asteroids::HideMenu()
 
 void Asteroids::ShowMenu()
 {
-    for (auto& button : mButtons) {
-        button->SetActive(true);
-        button->SetVisible(true);
-    }
+	mInMenu = true;
+
+	// Clear existing buttons
+	for (auto& button : mButtons) {
+		mGameWindow->RemoveMouseListener(button);
+	}
+
+	// Recreate all menu buttons
+	CreateMenuButtons();  // Extract button creation to a separate function
+
+	// Force redraw
+	glutPostRedisplay();
 }
 
 void Asteroids::OnButtonClick(Button* button)

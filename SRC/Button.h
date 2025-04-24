@@ -13,6 +13,7 @@ public:
     virtual ~Button();
 
      void SetActive(bool active) { mActive = active; }
+     bool IsActive() { return mActive; }
 
     virtual void Draw() override;
 
