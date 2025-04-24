@@ -5,9 +5,6 @@
   Button.cpp
   Bullet.cpp
   Asteroids.cpp
-C:\Users\smbaq\Documents\GitHub\Asteroid-Game\src\Asteroids.cpp(452,3): warning C4566: character represented by universal-character-name '\u2191' cannot be represented in the current code page (1252)
-C:\Users\smbaq\Documents\GitHub\Asteroid-Game\src\Asteroids.cpp(453,3): warning C4566: character represented by universal-character-name '\u2190' cannot be represented in the current code page (1252)
-C:\Users\smbaq\Documents\GitHub\Asteroid-Game\src\Asteroids.cpp(453,3): warning C4566: character represented by universal-character-name '\u2192' cannot be represented in the current code page (1252)
   Asteroid.cpp
   Generating Code...
   Asteroids.vcxproj -> C:\Users\smbaq\Documents\GitHub\Asteroid-Game\bin\Asteroids.exe

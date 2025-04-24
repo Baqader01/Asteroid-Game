@@ -8,6 +8,7 @@ Button::Button(const string& label)
 {
     // Set default button size
     mSize = GLVector2i(200, 40); // More standard button size
+    mColor = (GLVector3f(0, 0, 0));
 }
 
 Button::~Button()
