@@ -4,6 +4,9 @@
 #include "IWindowListener.h"
 #include "GlutSession.h"
 #include "GlutWindow.h"
+#include "Asteroids.h"
+
+class Asteroids;
 
 GlutWindow::GlutWindow(int w, int h, int x, int y, char* title)
 {
@@ -47,12 +50,25 @@ void GlutWindow::OnTimer(int value)
 
 void GlutWindow::OnKeyPressed(uchar key, int x, int y)
 {
-	// If the Esc key (code 27) has been pressed stop this session (exit program)
-	if (key == 27) { GlutSession::Stop(); }
+	// Special ESC key handling
+	if (key == 27) {
+		for (auto& listener : mKeyboardListeners) {
+			// Safe dynamic cast
+			Asteroids* asteroidsGame = dynamic_cast<Asteroids*>(listener.get());
+			if (asteroidsGame) {
+				if (asteroidsGame->HandleEscapeKey()) {
+					return; // Handled by Asteroids
+				}
+			}
+		}
+		// Default ESC behavior
+		GlutSession::Stop();
+		return;
+	}
 
-	// Send keyboard message to all listeners
-	for (KeyboardListenerList::iterator it = mKeyboardListeners.begin(); it != mKeyboardListeners.end(); ++it) {
-		(*it)->OnKeyPressed(key, x, y);
+	// Normal key handling
+	for (auto& listener : mKeyboardListeners) {
+		listener->OnKeyPressed(key, x, y);
 	}
 }
 

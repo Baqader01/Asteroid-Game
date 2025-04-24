@@ -1,4 +1,5 @@
-﻿#include "Asteroid.h"
+﻿#include "Asteroids.h"
+#include "Asteroid.h"
 #include "Asteroids.h"
 #include "Animation.h"
 #include "AnimationManager.h"
@@ -56,13 +57,17 @@ void Asteroids::Stop()
 // PUBLIC INSTANCE METHODS IMPLEMENTING IKeyboardListener /////////////////////
 void Asteroids::OnKeyPressed(uchar key, int x, int y)
 {
-	if (mShowingInstructions) {
-		if (key == 'm' || key == 'M') {
+	// Handle return to menu in any state
+	if (key == 'm' || key == 'M' || key == 27) { // 27 = ESC key
+		if (mShowingInstructions) {
 			mInstructionLabels.clear();
-			mShowingInstructions = false;
 			ShowMenu();
-			return;
 		}
+		else if (!mInMenu) {
+			// Return from game to menu
+			ReturnToMenu();
+		}
+		return;
 	}
 
 	switch (key)
@@ -325,6 +330,17 @@ void Asteroids::DrawMenuBackground()
 	}
 }
 
+bool Asteroids::HandleEscapeKey()
+{
+	if (mInMenu) {
+		return false; // Let default handler exit
+	}
+	else {
+		ReturnToMenu();
+		return true; // We handled it
+	}
+}
+
 // my function
 void Asteroids::CreateMenu()
 {
@@ -345,8 +361,11 @@ void Asteroids::CreateMenu()
 
 	// Set button click handlers
 	mButtons[0]->SetClickListener([this]() { StartGame(); });
+<<<<<<< HEAD
 	//mButtons[0]->SetClickListener([this]() { StartGame(); });
 	mButtons[2]->SetClickListener([this]() { ShowInstructions(); });
+=======
+>>>>>>> 5193e97c2709f36a334ec864200103962f3ff789
 	//add implementations
 
 	// Initial layout
@@ -358,6 +377,28 @@ void Asteroids::CreateMenu()
 		mScreenHeight = h;
 		UpdateButtonLayout();
 		});
+}
+<<<<<<< HEAD
+
+void Asteroids::ReturnToMenu()
+{
+	// Clear game state
+	mGameWorld->ClearObjects();
+	mInstructionLabels.clear();
+	mInMenu = true;
+
+	// Reset game state
+	mLevel = 0;
+	mAsteroidCount = 0;
+
+	// Recreate menu
+	CreateMenu();
+	ShowMenu();
+
+	// Reset GUI
+	mScoreLabel->SetText("Score: 0");
+	mLivesLabel->SetText("Lives: 3");
+	mGameOverLabel->SetVisible(false);
 }
 
 void Asteroids::ShowInstructions() {
@@ -420,6 +461,36 @@ void Asteroids::UpdateButtonLayout()
 			static_pointer_cast<GUIComponent>(btn),
 			GLVector2f(xPos, yPos));
 
+=======
+
+void Asteroids::UpdateButtonLayout()
+{
+	const float baseWidth = 800.0f;  // Original design width
+	const float baseHeight = 600.0f; // Original design height
+
+	// Calculate scale factors
+	float scaleX = mScreenWidth / baseWidth;
+	float scaleY = mScreenHeight / baseHeight;
+
+	// Calculate button size (300x50 at base size)
+	int buttonWidth = static_cast<int>(300 * scaleX);
+	int buttonHeight = static_cast<int>(50 * scaleY);
+
+	// Position buttons (starting at 70% down, spaced by 12%)
+	float yPos = 0.7f;
+	const float buttonSpacing = 0.12f;
+	const float xPos = ((baseWidth - 50) / 3) / baseWidth; // 35% from left
+
+	for (auto& btn : mButtons) {
+		btn->SetSize(GLVector2i(buttonWidth, buttonHeight));
+
+		// Update position
+		mGameDisplay->GetContainer()->RemoveComponent(static_pointer_cast<GUIComponent>(btn));
+		mGameDisplay->GetContainer()->AddComponent(
+			static_pointer_cast<GUIComponent>(btn),
+			GLVector2f(xPos, yPos));
+
+>>>>>>> 5193e97c2709f36a334ec864200103962f3ff789
 		yPos -= buttonSpacing;
 
 		// Refresh mouse listener
@@ -527,7 +598,3 @@ shared_ptr<GameObject> Asteroids::CreateExplosion()
 	explosion->Reset();
 	return explosion;
 }
-
-
-
-

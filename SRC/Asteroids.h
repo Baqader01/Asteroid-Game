@@ -11,6 +11,7 @@
 #include "IPlayerListener.h"
 #include "Button.h"
 #include "IButtonListener.h"
+#include "GlutSession.h"
 #include <vector>
 
 class GameObject;
@@ -28,6 +29,10 @@ public:
 	virtual void Stop(void);
 
 	void CreateAsteroids(int count, bool forMenu);
+<<<<<<< HEAD
+=======
+	void DeleteAllAsteroids();
+>>>>>>> 5193e97c2709f36a334ec864200103962f3ff789
 	
 	// Declaration of IKeyboardListener interface ////////////////////////////////
 
@@ -59,16 +64,24 @@ public:
 	void InitializeResources();
 
 	// Menu
+	void ReturnToMenu();
+
 	void CreateMenu();
 	void DrawMenuTitle();
 	void ShowMenu();
 	void HideMenu();
 
+<<<<<<< HEAD
 	void ShowInstructions();
 
 	void UpdateButtonLayout();
+=======
+	void UpdateButtonLayout();
 
+>>>>>>> 5193e97c2709f36a334ec864200103962f3ff789
 	void DrawMenuBackground();
+
+	bool HandleEscapeKey();
 
 private:
 	shared_ptr<Spaceship> mSpaceship;
@@ -80,10 +93,17 @@ private:
 	shared_ptr<Button> mHelpButton;
 
 	vector<shared_ptr<Button>> mButtons;
+<<<<<<< HEAD
 	vector<shared_ptr<GUILabel>> mInstructionLabels;
 
 	vector<shared_ptr<GameObject>> mMenuAsteroids;
 	vector<shared_ptr<GameObject>> mGameAsteroids;
+	vector<shared_ptr<IMouseListener>> mMouseListeners;
+=======
+
+	vector<shared_ptr<GameObject>> mMenuAsteroids;
+	vector<shared_ptr<GameObject>> mGameAsteroids;
+>>>>>>> 5193e97c2709f36a334ec864200103962f3ff789
 	vector<shared_ptr<GameObject>> mAsteroids;
 
 
@@ -93,7 +113,6 @@ private:
 	int mScreenWidth;
 	int mScreenHeight;
 
-	vector<shared_ptr<IMouseListener>> mMouseListeners;
 
 	enum class GameState { MENU, PLAYING, GAME_OVER };
 	GameState mCurrentState = GameState::MENU; 

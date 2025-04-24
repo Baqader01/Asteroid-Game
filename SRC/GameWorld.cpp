@@ -1,3 +1,4 @@
+#include "GameWorld.h"
 #include "GameUtil.h"
 #include "GameObject.h"
 #include "GameWorld.h"
@@ -148,6 +149,24 @@ GameObjectList GameWorld::GetCollisions(shared_ptr<GameObject> ptr)
 GameObjectList GameWorld::GetCollisions(GameObject* optr)
 {
 	return GetCollisions(shared_ptr<GameObject>(optr));
+}
+
+void GameWorld::ClearObjects()
+{
+	// Flag all objects for removal
+	for (auto& obj : mGameObjects) {
+		FlagForRemoval(obj);
+	}
+
+	// Process removals immediately
+	WeakGameObjectList::iterator it = mGameObjectsToRemove.begin();
+	while (it != mGameObjectsToRemove.end()) {
+		RemoveObject(it->lock());
+		it = mGameObjectsToRemove.erase(it);
+	}
+
+	// Clear collision map
+	mCollisions.clear();
 }
 
 void GameWorld::RenderMenu()
