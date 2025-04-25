@@ -47,11 +47,15 @@ public:
 	
 	void SetColor(const GLVector3f& color) { mColor = color; }
 	GLVector3f GetColor() { return mColor; }
+
+	void SetFontSize(int size) { mFontSize = size; }
+	int GetFontSize() { return mFontSize; }
 protected:
 	GLVector2i mSize;
 	GLVector2i mPosition;
 	GLVector2i mBorder;
 	GLVector3f mColor;
+	int mFontSize = 12;
 	bool mVisible;
 	GUIHorizontalAlignment mHorizontalAlignment;
 	GUIVerticalAlignment mVerticalAlignment;

@@ -28,6 +28,14 @@ public:
 	virtual void Start(void);
 	virtual void Stop(void);
 
+	enum class GameState {
+		MENU,
+		IN_GAME,
+		INSTRUCTIONS,
+		HIGH_SCORES,
+		GAME_OVER
+	};
+
 	void CreateAsteroids(int count, bool forMenu);
 	void DeleteAllAsteroids();
 
@@ -66,12 +74,8 @@ public:
 	void ReturnToMenu();
 
 	void CreateMenu();
-	void DeleteMenu();
-	void DrawMenuTitle();
 	void ShowMenu();
-	void CreateMenuButtons();
 	void HideMenu();
-	void UpdateButtonLayout();
 	void DrawMenuBackground();
 
 	void ShowInstructions();
@@ -81,31 +85,29 @@ public:
 	bool HandleEscapeKey();
 
 private:
+	GameState mCurrentState;
+
 	shared_ptr<Spaceship> mSpaceship;
 	shared_ptr<GUILabel> mScoreLabel;
 	shared_ptr<GUILabel> mLivesLabel;
 	shared_ptr<GUILabel> mGameOverLabel;
 	shared_ptr<GUILabel> mInstructionsLabel;
-	shared_ptr<Button> mStartButton;
-	shared_ptr<Button> mHelpButton;
+
 	shared_ptr<Asteroids> mSelfPtr; // Prevents deletion while listening
 
-	vector<shared_ptr<Button>> mButtons;
+	vector<shared_ptr<GUILabel>> mMenuLabels;
+	void CreateMenuLabels();
+	void UpdateLabelLayout();
+	void DrawMenuTitle();
+
 	vector<shared_ptr<GUILabel>> mInstructionLabels;
 
 	vector<shared_ptr<GameObject>> mMenuAsteroids;
 	vector<shared_ptr<GameObject>> mGameAsteroids;
 	vector<shared_ptr<IMouseListener>> mMouseListeners;
 
-	bool mInMenu;
-	bool mShowingInstructions;
-
 	int mScreenWidth;
 	int mScreenHeight;
-
-
-	enum class GameState { MENU, PLAYING, GAME_OVER };
-	GameState mCurrentState = GameState::MENU; 
 
 	uint mLevel;
 	uint mAsteroidCount;

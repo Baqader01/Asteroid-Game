@@ -19,11 +19,10 @@
 
 /** Constructor. Takes arguments from command line, just in case. */
 Asteroids::Asteroids(int argc, char* argv[])
-	: GameSession(argc, argv) 
+	: GameSession(argc, argv), mCurrentState(GameState::MENU)
 {
 	mLevel = 0;
 	mAsteroidCount = 0;
-	mInMenu = true;
 	mScreenWidth = 700; 
 	mScreenHeight = 600;
 
@@ -57,36 +56,43 @@ void Asteroids::Stop()
 // PUBLIC INSTANCE METHODS IMPLEMENTING IKeyboardListener /////////////////////
 void Asteroids::OnKeyPressed(uchar key, int x, int y)
 {
-	// Handle return to menu in any state
-	if (key == 'p' || key == 'P') { // 27 = ESC key
-		if (mShowingInstructions) {
-			HideInstructions();
-			//this is the problem
-			DeleteMenu();
-			glutPostRedisplay();
-			StartGame();
-		}
-		else if (!mInMenu) {
-			// Return from game to menu
+	const char lowerKey = tolower(key);
+
+	// State-independent commands
+	switch (lowerKey) {
+	case 'm': // Always returns to menu
+		if (mCurrentState != GameState::MENU) {
 			ReturnToMenu();
 		}
 		return;
-	}
 
-	if (key == 'm' || key == 'M') { // 27 = ESC key
-		DeleteMenu();
-		glutPostRedisplay();
-		StartGame();
+	case 'p': // Start game from menu or instructions
+		if (mCurrentState == GameState::INSTRUCTIONS) {
+			HideInstructions();
+			StartGame();
+		}
+		else if (mCurrentState == GameState::MENU)
+			HideMenu();
+			StartGame();
 		return;
 	}
 
-	switch (key)
-	{
-	case ' ':
-		mSpaceship->Shoot();
+	// State-specific commands
+	switch (mCurrentState) {
+	case GameState::MENU:
+		if (lowerKey == 'i') HideMenu(); ShowInstructions();
+		/*else if (lowerKey == 'h') ShowHighScores();
+		else if (lowerKey == 'd') ChangeDifficulty();*/
 		break;
 
-	default:
+	case GameState::IN_GAME:
+		if (lowerKey == ' ') mSpaceship->Shoot();
+		break;
+
+	case GameState::INSTRUCTIONS:
+	case GameState::HIGH_SCORES:
+	case GameState::GAME_OVER:
+		// These states only handle 'm'
 		break;
 	}
 }
@@ -197,7 +203,8 @@ shared_ptr<GameObject> Asteroids::CreateSpaceship()
 void Asteroids::StartGame()
 {
 	// i want the game to start here instead of start, so i can put the main menu over there
-	HideMenu();
+	mCurrentState = GameState::IN_GAME;
+
 	mGameWorld->ClearObjects();
 	// Force immediate redraw
 	glutPostRedisplay();
@@ -260,7 +267,7 @@ void Asteroids::CreateAsteroids(int count, bool forMenu)
 
 		mGameWorld->AddObject(asteroid);
 
-		if (forMenu) {
+		if (mCurrentState == GameState::MENU) {
 			mMenuAsteroids.push_back(asteroid); // Add to menu container
 		}
 		else {
@@ -357,108 +364,80 @@ void Asteroids::DrawMenuBackground()
 	}
 }
 
-bool Asteroids::HandleEscapeKey()
-{
-	if (mInMenu) {
-		return false; // Let default handler exit
-	}
-	else {
-		ReturnToMenu();
-		return true; // We handled it
-	}
-}
-
 // my function
 void Asteroids::CreateMenu()
 {
-	// Create menu asteroids
+	// Clear any existing menu
+	HideMenu();
+
+	// Create menu asteroids 
 	CreateAsteroids(12, true);
 
-	// Create buttons
-	CreateMenuButtons();
+	// Create menu labels
+	CreateMenuLabels();
 
-	// Add resize handler (using lambda directly)
-	mGameWindow->AddResizeCallback([this](int w, int h) {
-		mScreenWidth = w;
-		mScreenHeight = h;
-		UpdateButtonLayout();
-		});
+	// Force redraw
+	glutPostRedisplay();
 }
 
-void Asteroids::DeleteMenu()
+void Asteroids::CreateMenuLabels()
 {
-	// Clear existing buttons
-	for (auto& button : mButtons) {
-		mGameWindow->RemoveMouseListener(button);
-		button->SetActive(false);
-		button->SetVisible(false);
+	mMenuLabels.clear();
+
+	// Title
+	auto title = make_shared<GUILabel>("ASTEROIDS");
+	title->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+	title->SetColor(GLVector3f(0, 1, 0)); // Green
+	title->SetFontSize(48);
+	mMenuLabels.push_back(title);
+
+	// Menu options
+	vector<string> options = {
+		"Press 'S' to start the game",
+		"Press 'D' to change the difficulty",
+		"Press 'H' to look at the high scores",
+		"Press 'i' to look at the instructions"
+	};
+
+	for (const auto& text : options) {
+		auto label = make_shared<GUILabel>(text);
+		label->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+		label->SetColor(GLVector3f(1, 1, 1)); // White
+		mMenuLabels.push_back(label);
 	}
-	mButtons.clear();
-	mMenuAsteroids.clear();
-	
-}
 
-void Asteroids::CreateMenuButtons()
-{
-	mButtons.clear();
-
-	// Create and configure buttons
-	auto startBtn = make_shared<Button>("Start Game");
-	auto difficultyBtn = make_shared<Button>("Difficulty");
-	auto instructionsBtn = make_shared<Button>("Instructions");
-	auto highscoresBtn = make_shared<Button>("High Scores");
-
-	// Set button click handlers
-	startBtn->SetClickListener([this]() { 			
-		HideMenu();
-		glutPostRedisplay();
-		StartGame(); });
-	//difficultyBtn->SetClickListener([this]() { ShowDifficultyOptions(); });
-	instructionsBtn->SetClickListener([this]() { ShowInstructions(); });
-	//highscoresBtn->SetClickListener([this]() { ShowHighScores(); });
-
-	// Store buttons
-	mButtons = { startBtn, difficultyBtn, instructionsBtn, highscoresBtn };
-
-	// Set initial layout
-	UpdateButtonLayout();
-
-	// Register mouse listeners for all buttons
-	for (auto& btn : mButtons) {
-		mGameWindow->AddMouseListener(btn);
-	}
+	// Position the labels
+	UpdateLabelLayout();
 }
 
 void Asteroids::ReturnToMenu()
 {
-	// Clear game state
-	mGameWorld->ClearObjects();
-	mInstructionLabels.clear();
-	mInMenu = true;
-
-	// Reset game state
-	mLevel = 0;
-	mAsteroidCount = 0;
-
-	// Recreate menu
-	CreateMenu();
+	switch (mCurrentState) {
+	case GameState::IN_GAME:
+	//	StopGame();
+		break;
+	case GameState::INSTRUCTIONS:
+		HideInstructions();
+		break;
+	case GameState::HIGH_SCORES:
+	//	HideHighScores();
+		break;
+	case GameState::GAME_OVER:
+	//	HideGameOver();
+		break;
+	default:
+		break;
+	}
+	mCurrentState = GameState::MENU;
 	ShowMenu();
-
-	// Reset GUI
-	mScoreLabel->SetText("Score: 0");
-	mLivesLabel->SetText("Lives: 3");
-	mGameOverLabel->SetVisible(false);
 }
 
 void Asteroids::ShowInstructions()
 {
 	// Clear any existing menu or game state
 	HideMenu();
+	mCurrentState = GameState::INSTRUCTIONS;
 	mGameWorld->ClearObjects();
-
-	// Set flag to indicate we're showing instructions
-	mShowingInstructions = true;
-	mInMenu = false;
 
 	// Create a black background panel that covers the entire screen
 	shared_ptr<GUIComponent> background = make_shared<GUIComponent>();
@@ -477,13 +456,12 @@ void Asteroids::ShowInstructions()
 		"",
 		"Actions:",
 		"SPACEBAR - Fire Laser",
-		"M/ESC - Return to Menu",
+		"M - Return to Menu",
+		"Press P to Play"
 		"",
 		"Objective:",
 		"Destroy all asteroids!",
 		"Avoid collisions with them.",
-		"",
-		"Press P or ESC to return"
 	};
 
 	// Create and position labels
@@ -502,45 +480,29 @@ void Asteroids::ShowInstructions()
 }
 
 void Asteroids::HideInstructions() {
-	mShowingInstructions = false;
 	for (auto& label : mInstructionLabels) {
 		label->SetVisible(false);
 	}
 }
 
-void Asteroids::UpdateButtonLayout()
+void Asteroids::UpdateLabelLayout()
 {
-	const float baseWidth = 800.0f;  // Original design width
-	const float baseHeight = 600.0f; // Original design height
+	float yPos = 0.8f; // Start near top for title
+	const float spacing = 0.15f;
 
-	// Calculate scale factors
-	float scaleX = mScreenWidth / baseWidth;
-	float scaleY = mScreenHeight / baseHeight;
+	// Title position
+	mGameDisplay->GetContainer()->RemoveComponent(static_pointer_cast<GUIComponent>(mMenuLabels[0]));
+	mGameDisplay->GetContainer()->AddComponent(
+		static_pointer_cast<GUIComponent>(mMenuLabels[0]),
+		GLVector2f(0.5f, yPos));
 
-	// Calculate button size (300x50 at base size)
-	int buttonWidth = static_cast<int>(300 * scaleX);
-	int buttonHeight = static_cast<int>(50 * scaleY);
-
-	// Position buttons (starting at 70% down, spaced by 12%)
-	float yPos = 0.7f;
-	const float buttonSpacing = 0.12f;
-	const float xPos = ((baseWidth - 50) / 3) / baseWidth; // 35% from left
-
-	for (auto& btn : mButtons) {
-		btn->SetSize(GLVector2i(buttonWidth, buttonHeight));
-
-		// Update position
-		mGameDisplay->GetContainer()->RemoveComponent(static_pointer_cast<GUIComponent>(btn));
+	// Menu options positions
+	for (size_t i = 1; i < mMenuLabels.size(); i++) {
+		yPos -= spacing;
+		mGameDisplay->GetContainer()->RemoveComponent(static_pointer_cast<GUIComponent>(mMenuLabels[i]));
 		mGameDisplay->GetContainer()->AddComponent(
-			static_pointer_cast<GUIComponent>(btn),
-			GLVector2f(xPos, yPos));
-
-		yPos -= buttonSpacing;
-
-		// Refresh mouse listener
-		mGameWindow->RemoveMouseListener(btn);
-		mGameWindow->AddMouseListener(btn);
-		mGameWindow->AddMouseListener(btn);
+			static_pointer_cast<GUIComponent>(mMenuLabels[i]),
+			GLVector2f(0.5f, yPos));
 	}
 }
 
@@ -577,37 +539,42 @@ void Asteroids::DrawMenuTitle()
 
 void Asteroids::HideMenu()
 {
-	mInMenu = false;
-
-	if (!mButtons.empty()) {
-		for (auto& button : mButtons) {
-			button->SetActive(false);
-			button->SetVisible(false);
-		}
+	// Hide all labels (but don't delete them)
+	for (auto& label : mMenuLabels) {
+		label->SetVisible(false);
 	}
+
+	// Delete menu asteroids 
+	/*for (auto& asteroid : mMenuAsteroids) {
+		asteroid->SetVisible(false);
+	}*/
+
+	glutPostRedisplay();
 }
 
 void Asteroids::ShowMenu()
 {
-	mInMenu = true;
+	mCurrentState = GameState::MENU;
 
-	// Clear existing buttons
-	for (auto& button : mButtons) {
-		mGameWindow->RemoveMouseListener(button);
+	// Create menu elements if they don't exist
+	if (mMenuLabels.empty()) {
+		CreateMenuLabels();
 	}
 
-	// Recreate all menu buttons
-	CreateMenuButtons();  // Extract button creation to a separate function
+	// Make all labels visible
+	for (auto& label : mMenuLabels) {
+		label->SetVisible(true);
+	}
 
-	// Force redraw
+	// Show menu asteroids if there is none
+	//for (auto& asteroid : mMenuAsteroids) {
+	//}
+
 	glutPostRedisplay();
 }
 
 void Asteroids::OnButtonClick(Button* button)
 {
-	if (button == mStartButton.get()) {
-		StartGame();
-	}
 }
 
 void Asteroids::OnScoreChanged(int score)
