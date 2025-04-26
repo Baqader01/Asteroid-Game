@@ -40,7 +40,14 @@ public:
 		}
 	}
 
-	//me
+	void ResetLives() {
+		mLives = 3;
+	}
+
+	int GetLives() {
+		return mLives;
+	}
+
 	//adding an increase lives function
 	void IncreaseLives()
 	{

@@ -28,6 +28,8 @@ public:
 	virtual void Start(void);
 	virtual void Stop(void);
 
+	void CreateExtraLives(int count);
+
 	enum class GameState {
 		MENU,
 		IN_GAME,
@@ -36,7 +38,7 @@ public:
 		GAME_OVER
 	};
 
-	void CreateAsteroids(int count, bool forMenu);
+	void CreateAsteroids(int count);
 	void DeleteAllAsteroids();
 
 	void SetupInputListeners();
@@ -81,9 +83,6 @@ public:
 	void ShowInstructions();
 	void HideInstructions();
 
-
-	bool HandleEscapeKey();
-
 private:
 	GameState mCurrentState;
 
@@ -102,8 +101,7 @@ private:
 
 	vector<shared_ptr<GUILabel>> mInstructionLabels;
 
-	vector<shared_ptr<GameObject>> mMenuAsteroids;
-	vector<shared_ptr<GameObject>> mGameAsteroids;
+	vector<shared_ptr<GameObject>> mAsteroids;
 	vector<shared_ptr<IMouseListener>> mMouseListeners;
 
 	int mScreenWidth;
@@ -120,7 +118,6 @@ private:
 
 	// to start fighting the astroids
 	void StartGame();
-
 
 	// button dimensions
 	GLVector2f screenSize = GLVector2f(800.0f, 600.0f);

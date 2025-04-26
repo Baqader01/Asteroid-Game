@@ -3,7 +3,7 @@
 #include "Asteroid.h"
 #include "BoundingShape.h"
 
-Asteroid::Asteroid(bool isMenuAsteroid) : GameObject("Asteroid"), mIsMenuAsteroid(isMenuAsteroid)
+Asteroid::Asteroid() : GameObject("Asteroid")
 {
 	mAngle = rand() % 360;
 	mRotation = 0; // rand() % 90;

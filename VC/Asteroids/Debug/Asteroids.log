@@ -1,10 +1,20 @@
 ﻿cl : command line  warning D9035: option 'Gm' has been deprecated and will be removed in a future release
+  main.cpp
   Asteroids.cpp
+  Asteroid.cpp
+  Generating Code...
+Spaceship.obj : warning LNK4204: '' is missing debugging information for referencing module; linking object as if no debug info
+ExtraLives.obj : warning LNK4204: '' is missing debugging information for referencing module; linking object as if no debug info
+Explosion.obj : warning LNK4204: '' is missing debugging information for referencing module; linking object as if no debug info
+Button.obj : warning LNK4204: '' is missing debugging information for referencing module; linking object as if no debug info
+Bullet.obj : warning LNK4204: '' is missing debugging information for referencing module; linking object as if no debug info
   Asteroids.vcxproj -> C:\Users\smbaq\Documents\GitHub\Asteroid-Game\bin\Asteroids.exe
   ..\..\assets\asteroid.shape
   ..\..\assets\asteroid1_fs.png
   ..\..\assets\bullet.shape
+  ..\..\assets\debug_log.txt
   ..\..\assets\explosion_fs.png
+  ..\..\assets\hearts.png
   ..\..\assets\spaceship.shape
   ..\..\assets\spaceship_fs.png
-          6 file(s) copied.
+          8 file(s) copied.

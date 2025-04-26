@@ -169,26 +169,9 @@ void GameWorld::ClearObjects()
 	mCollisions.clear();
 }
 
-void GameWorld::RenderMenu()
+int GameWorld::GetObjectCount()
 {
-	// Set up orthographic projection for 2D menu
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-	// Render all menu objects
-	for (auto& menuObj : mMenuObjects) {
-		menuObj->PreRender();
-		menuObj->Render();
-		menuObj->PostRender();
-	}
-
-	// Restore projection
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
+	return mGameObjects.size();
 }
 
 /** Update all objects. */
