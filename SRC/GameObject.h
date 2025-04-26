@@ -53,6 +53,21 @@ public:
 	GLVector3f GetVelocity() { return mVelocity; }
 	GLVector3f GetAcceleration() { return mAcceleration; }
 
+	float Length() const {
+		return sqrt(mPosition.x * mPosition.x +
+			mPosition.y * mPosition.y +
+			mPosition.z * mPosition.z);
+	}
+
+	void Normalize() {
+		float len = Length();
+		if (len > 0.0f) {
+			mPosition.x /= len;
+			mPosition.y /= len;
+			mPosition.z /= len;
+		}
+	}
+
 	void SetScale(float s) { mScale = s; }
 	float GetScale() { return mScale; }
 
@@ -62,7 +77,6 @@ public:
 	void SetBoundingShape(shared_ptr<BoundingShape> bs) { mBoundingShape = bs; }
 
 	shared_ptr<GameObject> GetThisPtr() { return shared_from_this(); }
-
 	shared_ptr<Sprite> GetSprite() { return mSprite; }
 
 protected:

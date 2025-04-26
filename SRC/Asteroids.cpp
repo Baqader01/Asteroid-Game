@@ -14,6 +14,8 @@
 #include "Explosion.h"
 #include <Windows.h>
 #include "ExtraLives.h"
+#include "BlackHole.h"
+#include "BlackHoleCoin.h"
 
 // PUBLIC INSTANCE CONSTRUCTORS ///////////////////////////////////////////////
 
@@ -53,19 +55,16 @@ void Asteroids::Stop()
 	GameSession::Stop();
 }
 
-void Asteroids::CreateExtraLives(int count)
-{
+void Asteroids::CreateExtraLives(int count) {
 	Animation* anim = AnimationManager::GetInstance().GetAnimationByName("heart");
 	if (!anim) return;
 
 	for (int i = 0; i < count; i++) {
 		auto extraLife = make_shared<ExtraLives>();
-
-		// Set visual properties
-		extraLife->SetBoundingShape(make_shared<BoundingSphere>(extraLife->GetThisPtr(), 4.0f));
+		extraLife->SetBoundingShape(make_shared<BoundingSphere>(extraLife->GetThisPtr(), 1)); // Smaller bounding sphere
 		auto sprite = make_shared<Sprite>(anim->GetWidth(), anim->GetHeight(), anim);
 		extraLife->SetSprite(sprite);
-		extraLife->SetScale(0.1f);
+		extraLife->SetScale(0.1f);  // Add scaling
 
 		mGameWorld->AddObject(extraLife);
 	}
@@ -162,14 +161,11 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 	if (object->GetType() == GameObjectType("ExtraLives")) {
 		OutputDebugString("ExtraLives collected! Attempting to increase lives...\n");
 
-		// If mPlayer is a shared_ptr<Player>
-		mPlayer.IncreaseLives();  // Give +1 life
-
+		mPlayer.IncreaseLives();
 		mLivesLabel->SetText("Lives: " + std::to_string(mPlayer.GetLives()));
-		return;  // Skip other checks
+		return;
 	}
-
-	if (object->GetType() == GameObjectType("Asteroid")) {
+	else if (object->GetType() == GameObjectType("Asteroid")) {
 		auto asteroid = dynamic_pointer_cast<Asteroid>(object);
 
 		// Remove from tracking container
@@ -189,6 +185,24 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 			SetTimer(500, START_NEXT_LEVEL);
 		}
 	}
+	else if (object->GetType() == GameObjectType("BlackHoleCoin")) {
+		// When a BlackHoleCoin is collected 
+		auto coin = dynamic_pointer_cast<BlackHoleCoin>(object);
+
+		// Create an active black hole 
+		auto newBlackHole = make_shared<BlackHole>();
+		newBlackHole->SetPosition(coin->GetRandomPosition());
+		newBlackHole->SetScale(0.2);
+		newBlackHole->SetBoundingShape(make_shared<BoundingSphere>(newBlackHole->GetThisPtr(), 20)); // Initialize bounding shape
+
+		// Set visual properties
+		Animation* anim = AnimationManager::GetInstance().GetAnimationByName("wormhole");
+		if (anim) {
+			newBlackHole->SetSprite(make_shared<Sprite>(anim->GetWidth(), anim->GetHeight(), anim));
+		}
+
+		mGameWorld->AddObject(newBlackHole);
+	}
 }
 
 // PUBLIC INSTANCE METHODS IMPLEMENTING ITimerListener ////////////////////////
@@ -206,7 +220,8 @@ void Asteroids::OnTimer(int value)
 		mLevel++;
 		int num_asteroids = 10 + 2 * mLevel;
 		CreateAsteroids(num_asteroids);
-		CreateExtraLives(2 * mLevel);
+		CreateBlackHole(2);
+		CreateExtraLives(2);
 	}
 
 	if (value == SHOW_GAME_OVER)
@@ -270,7 +285,8 @@ void Asteroids::StartGame()
 
 	// Create initial asteroids
 	CreateAsteroids(10);
-	CreateExtraLives(5);
+	CreateExtraLives(3);
+	CreateBlackHole(3);
 
 	// Reset game state
 	mLevel = 0;
@@ -280,21 +296,39 @@ void Asteroids::StartGame()
 	mPlayer.AddListener(thisPtr);
 }
 
-void Asteroids::CreateAsteroids(int count) {
-	InitializeResources();
-	Animation* anim = AnimationManager::GetInstance().GetAnimationByName("asteroid1");
+void Asteroids::CreateBlackHole(int count)
+{
+	Animation* anim = AnimationManager::GetInstance().GetAnimationByName("wormhole");
 	if (!anim) return;
 
 	for (int i = 0; i < count; i++) {
-		auto asteroid = make_shared<Asteroid>();
-		asteroid->SetBoundingShape(make_shared<BoundingSphere>(asteroid->GetThisPtr(), 10.0f));
-		asteroid->SetSprite(make_shared<Sprite>(anim->GetWidth(), anim->GetHeight(), anim));
-		asteroid->SetScale(0.2f);
+		auto coin = make_shared<BlackHoleCoin>();
 
-		mGameWorld->AddObject(asteroid);
-		mAsteroids.push_back(asteroid);  // Add to tracking container
+		// Make it smaller than the actual black hole
+		coin->SetBoundingShape(make_shared<BoundingSphere>(coin->GetThisPtr(), 2));
+		auto sprite = make_shared<Sprite>(anim->GetWidth() / 2, anim->GetHeight() / 2, anim);
+		coin->SetSprite(sprite);
+		coin->SetScale(0.2f); // Smaller scale for the coin
+
+		mGameWorld->AddObject(coin);
 	}
-	mAsteroidCount = mAsteroids.size();  // Keep count in sync
+}
+
+void Asteroids::CreateAsteroids(int count) {
+    Animation* anim = AnimationManager::GetInstance().GetAnimationByName("asteroid1");
+    if (!anim) return;
+
+    for (int i = 0; i < count; i++) {
+        auto asteroid = make_shared<Asteroid>();
+        // Add scale factor here (0.1f makes it 10% of original size)
+        asteroid->SetSprite(make_shared<Sprite>(anim->GetWidth(), anim->GetHeight(), anim));
+        asteroid->SetScale(0.2f);
+        asteroid->SetBoundingShape(make_shared<BoundingSphere>(asteroid->GetThisPtr(), 10)); // Scale down bounding sphere too
+
+        mGameWorld->AddObject(asteroid);
+        mAsteroids.push_back(asteroid);
+    }
+    mAsteroidCount = mAsteroids.size();
 }
 
 void Asteroids::DeleteAllAsteroids() {
@@ -513,6 +547,11 @@ void Asteroids::InitializeResources()
 	AnimationManager::GetInstance().CreateAnimationFromFile("explosion", 64, 1024, 64, 64, "explosion_fs.png");
 	AnimationManager::GetInstance().CreateAnimationFromFile("asteroid1", 128, 8192, 128, 128, "asteroid1_fs.png");
 	AnimationManager::GetInstance().CreateAnimationFromFile("spaceship", 128, 128, 128, 128, "spaceship_fs.png");
+
+	//Hansjörg Malthaner : http://opengameart.org/users/varkalandar
+	AnimationManager::GetInstance().CreateAnimationFromFile("wormhole", 128, 96, 128, 96, "Wormhole.png");
+
+	// game asset from itch io by goblin mode games: https://goblin-mode-games.itch.io/pixel-art-heart-capsules
 	AnimationManager::GetInstance().CreateAnimationFromFile("heart", 80, 80, 80, 80, "Hearts.png");
 }
 

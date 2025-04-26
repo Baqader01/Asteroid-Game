@@ -33,11 +33,10 @@ bool Asteroid::CollisionTest(shared_ptr<GameObject> o)
 
 void Asteroid::OnCollision(const GameObjectList& objects)
 {
-
 	// Find the spaceship in the collided objects
 	for (auto obj : objects) {
-		// Menu asteroids can't be destroyed
-		if (!mIsMenuAsteroid && !(obj->GetType() == GameObjectType("ExtraLives"))) {
+        // Only destroy asteroid if colliding with a bullet or a black hole
+        if (obj->GetType() == GameObjectType("Bullet") || obj->GetType() == GameObjectType("BlackHole")){
 			if (auto world = GetWorld()) {
 				world->FlagForRemoval(GetThisPtr());
 			}

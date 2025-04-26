@@ -106,6 +106,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\SRC\Asteroid.cpp" />
     <ClCompile Include="..\..\src\Asteroids.cpp" />
+    <ClCompile Include="..\..\SRC\BlackHole.cpp" />
     <ClCompile Include="..\..\src\Bullet.cpp" />
     <ClCompile Include="..\..\SRC\Explosion.cpp" />
     <ClCompile Include="..\..\SRC\ExtraLives.cpp" />
@@ -115,12 +116,12 @@
   <ItemGroup>
     <ClInclude Include="..\..\SRC\Asteroid.h" />
     <ClInclude Include="..\..\src\Asteroids.h" />
+    <ClInclude Include="..\..\SRC\BlackHole.h" />
     <ClInclude Include="..\..\SRC\BoundingShape.h" />
     <ClInclude Include="..\..\SRC\BoundingSphere.h" />
     <ClInclude Include="..\..\src\Bullet.h" />
     <ClInclude Include="..\..\SRC\Explosion.h" />
     <ClInclude Include="..\..\SRC\ExtraLives.h" />
-    <ClInclude Include="..\..\SRC\IResizeListener.h" />
     <ClInclude Include="..\..\SRC\Player.h" />
     <ClInclude Include="..\..\src\Spaceship.h" />
   </ItemGroup>

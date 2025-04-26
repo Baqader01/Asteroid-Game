@@ -50,6 +50,10 @@ public:
 	void WrapXY(GLfloat& x, GLfloat& y);
 
 	int GetObjectCount();
+
+	GameObjectList GetObjects() {return mGameObjects;
+	}
+	
 protected:
 	void UpdateObjects(int t);
 	void UpdateCollisions(int t);

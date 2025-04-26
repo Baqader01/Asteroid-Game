@@ -34,7 +34,7 @@ void ExtraLives::OnCollision(const GameObjectList& objects)
 {
     // Find the spaceship in the collided objects
     for (auto obj : objects) {
-        if (!(obj->GetType() == GameObjectType("Asteroid"))) {
+        if (obj->GetType() == GameObjectType("Spaceship")) {
             // Remove the ExtraLives object 
             if (auto world = GetWorld()) {
                 world->FlagForRemoval(GetThisPtr());

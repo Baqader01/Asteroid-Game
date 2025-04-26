@@ -121,6 +121,8 @@ private:
 	// to start fighting the astroids
 	void StartGame();
 
+	void CreateBlackHole(int count);
+
 	// button dimensions
 	GLVector2f screenSize = GLVector2f(800.0f, 600.0f);
 	GLVector2f buttonSize = GLVector2f(200.0f, 50.0f);

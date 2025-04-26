@@ -1,5 +1,7 @@
 ﻿cl : command line  warning D9035: option 'Gm' has been deprecated and will be removed in a future release
   Asteroids.cpp
+  BlackHole.cpp
+  Generating Code...
   Asteroids.vcxproj -> C:\Users\smbaq\Documents\GitHub\Asteroid-Game\bin\Asteroids.exe
   ..\..\assets\asteroid.shape
   ..\..\assets\asteroid1_fs.png
@@ -8,4 +10,5 @@
   ..\..\assets\hearts.png
   ..\..\assets\spaceship.shape
   ..\..\assets\spaceship_fs.png
-          7 file(s) copied.
+  ..\..\assets\Wormhole.png
+          8 file(s) copied.

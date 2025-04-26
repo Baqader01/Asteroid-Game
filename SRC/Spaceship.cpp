@@ -96,7 +96,8 @@ bool Spaceship::CollisionTest(shared_ptr<GameObject> o)
 {
 	// Allow collisions with Asteroids and ExtraLives
 	if (o->GetType() != GameObjectType("Asteroid") &&
-		o->GetType() != GameObjectType("ExtraLives")) {
+		o->GetType() != GameObjectType("ExtraLives") &&
+		o->GetType() != GameObjectType("BlackHoleCoin"))  {
 		return false;
 	}
 
@@ -110,10 +111,6 @@ void Spaceship::OnCollision(const GameObjectList& objects)
 		if (obj->GetType() == GameObjectType("Asteroid")) {
 			// Only destroy ship when hitting asteroids
 			mWorld->FlagForRemoval(GetThisPtr());
-			break;
-		}
-		else if (obj->GetType() == GameObjectType("ExtraLives")) {
-			//extra life
 			break;
 		}
 	}
