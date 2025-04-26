@@ -62,10 +62,10 @@ void Asteroids::CreateExtraLives(int count)
 		auto extraLife = make_shared<ExtraLives>();
 
 		// Set visual properties
-		extraLife->SetBoundingShape(make_shared<BoundingSphere>(extraLife->GetThisPtr(), 7.0f));
+		extraLife->SetBoundingShape(make_shared<BoundingSphere>(extraLife->GetThisPtr(), 4.0f));
 		auto sprite = make_shared<Sprite>(anim->GetWidth(), anim->GetHeight(), anim);
 		extraLife->SetSprite(sprite);
-		extraLife->SetScale(0.15f);
+		extraLife->SetScale(0.1f);
 
 		mGameWorld->AddObject(extraLife);
 	}
@@ -89,9 +89,10 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 			HideInstructions();
 			StartGame();
 		}
-		else if (mCurrentState == GameState::MENU)
+		else if (mCurrentState == GameState::MENU) {
 			HideMenu();
-		StartGame();
+			StartGame();
+		}
 		return;
 	case 'i':
 		if (mCurrentState == GameState::MENU) {
@@ -128,7 +129,7 @@ void Asteroids::OnSpecialKeyPressed(int key, int x, int y)
 	switch (key)
 	{
 	// If up arrow key is pressed start applying forward thrust
-	case GLUT_KEY_UP: mSpaceship->Thrust(10); break;
+	case GLUT_KEY_UP: mSpaceship->Thrust(20); break;
 	// If left arrow key is pressed start rotating anti-clockwise
 	case GLUT_KEY_LEFT: mSpaceship->Rotate(90); break;
 	// If right arrow key is pressed start rotating clockwise
@@ -158,11 +159,14 @@ void Asteroids::OnSpecialKeyReleased(int key, int x, int y)
 
 void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 {
-	if (object->GetType() == GameObjectType("ExtraLives") && mCurrentState == GameState::IN_GAME) {
-		auto player = dynamic_pointer_cast<Player>(object);
-		if (player) {
-			player->IncreaseLives();
-		}
+	if (object->GetType() == GameObjectType("ExtraLives")) {
+		OutputDebugString("ExtraLives collected! Attempting to increase lives...\n");
+
+		// If mPlayer is a shared_ptr<Player>
+		mPlayer.IncreaseLives();  // Give +1 life
+
+		mLivesLabel->SetText("Lives: " + std::to_string(mPlayer.GetLives()));
+		return;  // Skip other checks
 	}
 
 	if (object->GetType() == GameObjectType("Asteroid")) {
@@ -202,6 +206,7 @@ void Asteroids::OnTimer(int value)
 		mLevel++;
 		int num_asteroids = 10 + 2 * mLevel;
 		CreateAsteroids(num_asteroids);
+		CreateExtraLives(2 * mLevel);
 	}
 
 	if (value == SHOW_GAME_OVER)
@@ -241,14 +246,8 @@ void Asteroids::StartGame()
 	// i want the game to start here instead of start, so i can put the main menu over there
 	mCurrentState = GameState::IN_GAME;
 
-	mGameWorld->ClearObjects();
 	// Force immediate redraw
 	glutPostRedisplay();
-
-	DeleteAllAsteroids();
-
-	// Create a shared pointer for the Asteroids game object - DO NOT REMOVE
-	shared_ptr<Asteroids> thisPtr = shared_ptr<Asteroids>(this);
 
 	// Create an ambient light to show sprite textures
 	GLfloat ambient_light[] = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -271,13 +270,11 @@ void Asteroids::StartGame()
 
 	// Create initial asteroids
 	CreateAsteroids(10);
+	CreateExtraLives(5);
 
 	// Reset game state
 	mLevel = 0;
 	//mScoreKeeper.ResetScore();
-
-	// Add a player (watcher) to the game world
-	mGameWorld->AddListener(&mPlayer);
 
 	// Add this class as a listener of the player
 	mPlayer.AddListener(thisPtr);
@@ -324,17 +321,15 @@ void Asteroids::DeleteAllAsteroids() {
 
 void Asteroids::SetupInputListeners()
 {
-	// Create shared_ptr to this 
-	shared_ptr<Asteroids> thisPtr = shared_ptr<Asteroids>(this);
-
 	// Add this class as a listener of the game world
 	mGameWorld->AddListener(thisPtr.get());
 
 	// Add this as a listener to the world and the keyboard
 	mGameWindow->AddKeyboardListener(thisPtr);
 
-	// Store the shared_ptr to prevent deletion
-	mSelfPtr = thisPtr;
+	// Add a player (watcher) to the game world
+	mGameWorld->AddListener(&mPlayer);
+
 }
 
 void Asteroids::CreateGUI()
@@ -373,42 +368,11 @@ void Asteroids::CreateGUI()
 
 }
 
-void Asteroids::DrawMenuBackground()
-{
-	// Starfield background
-	glColor3f(1.0f, 1.0f, 1.0f);
-	glBegin(GL_POINTS);
-	for (int i = 0; i < 100; i++) {
-		glVertex2f(rand() % GLUT_SCREEN_WIDTH, rand() % GLUT_SCREEN_HEIGHT);
-	}
-	glEnd();
-
-	// Asteroids logo text (big blocky letters)
-	const char* title = "ASTEROIDS";
-	int titleWidth = 0;
-	for (const char* c = title; *c; c++) {
-		titleWidth += glutBitmapWidth(GLUT_BITMAP_HELVETICA_18, *c) * 2;
-	}
-
-	glColor3f(0.0f, 1.0f, 0.0f); // Green
-	glRasterPos2i((GLUT_SCREEN_WIDTH - titleWidth) / 2, GLUT_SCREEN_HEIGHT - 100);
-	for (const char* c = title; *c; c++) {
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
-		// Extra spacing for retro look
-		//glRasterPos2i(glutGet(GLUT_CURRENT_RASTER_POSITION_X) + 20,
-		//	glutGet(GLUT_CURRENT_RASTER_POSITION_Y));
-	}
-}
-
 // my function
 void Asteroids::CreateMenu()
 {
 	InitializeResources();
 
-	// Clear any existing menu
-	HideMenu();
-
-	mGameWorld->ClearObjects();
 	mAsteroids.clear();
 
 	//Create Menu asteroids
@@ -480,13 +444,6 @@ void Asteroids::ShowInstructions()
 	mCurrentState = GameState::INSTRUCTIONS;
 	mGameWorld->ClearObjects();
 
-	// Create a black background panel that covers the entire screen
-	shared_ptr<GUIComponent> background = make_shared<GUIComponent>();
-	background->SetColor(GLVector3f(0, 0, 0)); // Black
-	background->SetPosition(GLVector2i(0, 0));
-	background->SetSize(GLVector2i(mScreenWidth, mScreenHeight));
-	mGameDisplay->GetContainer()->AddComponent(background, GLVector2f(0, 0));
-
 	// Instruction text lines
 	vector<string> instructions = {
 		"HOW TO PLAY",
@@ -513,6 +470,7 @@ void Asteroids::ShowInstructions()
 		label->SetColor(GLVector3f(1, 1, 1)); // White text
 		mGameDisplay->GetContainer()->AddComponent(label, GLVector2f(0.5f, yPos));
 		mInstructionLabels.push_back(label);
+		mInstructionLabels.push_back(label);
 		yPos -= 0.07f; // Move down 7% per line
 	}
 
@@ -521,6 +479,8 @@ void Asteroids::ShowInstructions()
 }
 
 void Asteroids::HideInstructions() {
+	DeleteAllAsteroids();
+
 	for (auto& label : mInstructionLabels) {
 		label->SetVisible(false);
 	}
@@ -576,6 +536,8 @@ void Asteroids::DrawMenuTitle()
 
 void Asteroids::HideMenu()
 {
+	DeleteAllAsteroids();
+
 	// Hide all labels 
 	for (auto& label : mMenuLabels) {
 		label->SetVisible(false);
@@ -603,10 +565,6 @@ void Asteroids::ShowMenu()
 	//}
 
 	glutPostRedisplay();
-}
-
-void Asteroids::OnButtonClick(Button* button)
-{
 }
 
 void Asteroids::OnScoreChanged(int score)

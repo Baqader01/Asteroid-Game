@@ -47,7 +47,7 @@ public:
 	void SetHeight(int h) { mHeight = h; }
 	int GetHeight() { return mHeight; }
 
-	void WrapXY(float &x, float &y);
+	void WrapXY(GLfloat& x, GLfloat& y);
 
 	int GetObjectCount();
 protected:

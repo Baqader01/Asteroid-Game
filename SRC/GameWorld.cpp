@@ -1,7 +1,6 @@
 #include "GameWorld.h"
 #include "GameUtil.h"
 #include "GameObject.h"
-#include "GameWorld.h"
 
 // PUBLIC INSTANCE CONSTRUCTORS ///////////////////////////////////////////////
 
@@ -227,7 +226,7 @@ void GameWorld::UpdateCollisions(int t)
 }
 
 /** Utility method to wrap positions around the world's edges. */
-void GameWorld::WrapXY(GLfloat &x, GLfloat &y)
+void GameWorld::WrapXY(GLfloat& x, GLfloat& y)
 {
 	// Wrap x and y coords that are out of the bounds of the world
 	while (x >  mWidth/2)  x -= mWidth; 
@@ -235,3 +234,4 @@ void GameWorld::WrapXY(GLfloat &x, GLfloat &y)
 	while (x < -mWidth/2)  x += mWidth; 
 	while (y < -mHeight/2) y += mHeight; 
 }
+

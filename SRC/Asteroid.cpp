@@ -5,6 +5,7 @@
 
 Asteroid::Asteroid() : GameObject("Asteroid")
 {
+	mIsMenuAsteroid = false;
 	mAngle = rand() % 360;
 	mRotation = 0; // rand() % 90;
 	mPosition.x = rand() / 2;
@@ -32,10 +33,15 @@ bool Asteroid::CollisionTest(shared_ptr<GameObject> o)
 
 void Asteroid::OnCollision(const GameObjectList& objects)
 {
-    // Menu asteroids can't be destroyed
-    if (!mIsMenuAsteroid) {
-        mWorld->FlagForRemoval(GetThisPtr());
-    }
 
-	mWorld->FlagForRemoval(GetThisPtr());
+	// Find the spaceship in the collided objects
+	for (auto obj : objects) {
+		// Menu asteroids can't be destroyed
+		if (!mIsMenuAsteroid && !(obj->GetType() == GameObjectType("ExtraLives"))) {
+			if (auto world = GetWorld()) {
+				world->FlagForRemoval(GetThisPtr());
+			}
+			break;  // Exit after handling
+		}
+	}
 }

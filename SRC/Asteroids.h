@@ -13,6 +13,7 @@
 #include "IButtonListener.h"
 #include "GlutSession.h"
 #include <vector>
+#include <Windows.h>
 
 class GameObject;
 class Spaceship;
@@ -70,15 +71,12 @@ public:
 	// GUI
 	void CreateGUI();
 
-	void InitializeResources();
-
 	// Menu
 	void ReturnToMenu();
 
 	void CreateMenu();
 	void ShowMenu();
 	void HideMenu();
-	void DrawMenuBackground();
 
 	void ShowInstructions();
 	void HideInstructions();
@@ -95,6 +93,9 @@ private:
 	shared_ptr<Asteroids> mSelfPtr; // Prevents deletion while listening
 
 	vector<shared_ptr<GUILabel>> mMenuLabels;
+
+	void InitializeResources();
+
 	void CreateMenuLabels();
 	void UpdateLabelLayout();
 	void DrawMenuTitle();
@@ -103,6 +104,9 @@ private:
 
 	vector<shared_ptr<GameObject>> mAsteroids;
 	vector<shared_ptr<IMouseListener>> mMouseListeners;
+
+	// Create a shared pointer for the Asteroids game object - DO NOT REMOVE
+	shared_ptr<Asteroids> thisPtr = shared_ptr<Asteroids>(this);
 
 	int mScreenWidth;
 	int mScreenHeight;
@@ -114,8 +118,6 @@ private:
 	shared_ptr<GameObject> CreateSpaceship();
 	shared_ptr<GameObject> CreateExplosion();
 	
-	virtual void OnButtonClick(Button* button);
-
 	// to start fighting the astroids
 	void StartGame();
 

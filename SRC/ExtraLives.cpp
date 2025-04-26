@@ -1,5 +1,6 @@
 #include "ExtraLives.h"
 #include "Spaceship.h"
+#include "Player.h"
 
 ExtraLives::ExtraLives()
     : GameObject("ExtraLives")
@@ -31,7 +32,16 @@ bool ExtraLives::CollisionTest(shared_ptr<GameObject> o)
 
 void ExtraLives::OnCollision(const GameObjectList& objects)
 {
-    if (auto world = GetWorld()) {
-        world->FlagForRemoval(GetThisPtr());
+    // Find the spaceship in the collided objects
+    for (auto obj : objects) {
+        if (!(obj->GetType() == GameObjectType("Asteroid"))) {
+            // Remove the ExtraLives object 
+            if (auto world = GetWorld()) {
+                world->FlagForRemoval(GetThisPtr());
+            }
+            break;  // Exit after handling
+        }
     }
+
+
 }

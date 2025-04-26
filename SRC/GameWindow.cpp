@@ -74,6 +74,8 @@ GameWorld* GameWindow::GetWorld() { return mWorld; }
 void GameWindow::SetDisplay(GameDisplay* d) { mDisplay = d; UpdateDisplaySize(); }
 GameDisplay* GameWindow::GetDisplay() { return mDisplay; }
 
+
+
 void GameWindow::AddResizeCallback(function<void(int, int)> callback)
 {
 	mResizeCallbacks.push_back(callback);
