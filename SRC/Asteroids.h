@@ -81,6 +81,9 @@ public:
 	void ShowInstructions();
 	void HideInstructions();
 
+	void ShowHighScore();
+	void HideHighScore();
+
 private:
 	GameState mCurrentState;
 
@@ -101,6 +104,7 @@ private:
 	void DrawMenuTitle();
 
 	vector<shared_ptr<GUILabel>> mInstructionLabels;
+	vector<shared_ptr<GUILabel>> mHighScoreLabels;
 
 	vector<shared_ptr<GameObject>> mAsteroids;
 	vector<shared_ptr<IMouseListener>> mMouseListeners;

@@ -99,6 +99,12 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 			ShowInstructions();
 		}
 		return;
+	case 'h':
+		if (mCurrentState == GameState::MENU) {
+			HideMenu();
+			ShowHighScore();
+		}
+		return;
 	}
 
 	// State-specific commands
@@ -159,8 +165,6 @@ void Asteroids::OnSpecialKeyReleased(int key, int x, int y)
 void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 {
 	if (object->GetType() == GameObjectType("ExtraLives")) {
-		OutputDebugString("ExtraLives collected! Attempting to increase lives...\n");
-
 		mPlayer.IncreaseLives();
 		mLivesLabel->SetText("Lives: " + std::to_string(mPlayer.GetLives()));
 		return;
@@ -459,7 +463,7 @@ void Asteroids::ReturnToMenu()
 		HideInstructions();
 		break;
 	case GameState::HIGH_SCORES:
-	//	HideHighScores();
+		HideHighScore();
 		break;
 	case GameState::GAME_OVER:
 	//	HideGameOver();
@@ -520,6 +524,54 @@ void Asteroids::HideInstructions() {
 	}
 }
 
+void Asteroids::ShowHighScore()
+{
+	// Clear any existing menu or game state
+	HideMenu();
+	mCurrentState = GameState::HIGH_SCORES;
+
+	// Try to open the high scores file
+	ifstream file("highscores.txt");
+	vector<string> lines;
+
+	if (file.is_open()) {
+		string line;
+		while (getline(file, line)) {
+			lines.push_back(line);
+			if (lines.size() >= 11) break; // Only show first 10 scores + title
+		}
+		file.close();
+	}
+
+	// Create and position labels
+	float yPos = 0.9f; // Start near top (10% from top)
+	for (const string& line : lines) {
+		auto label = make_shared<GUILabel>(line);
+		label->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+		label->SetColor(GLVector3f(1, 1, 1)); // White text
+		mGameDisplay->GetContainer()->AddComponent(label, GLVector2f(0.5f, yPos));
+		mHighScoreLabels.push_back(label);
+		yPos -= 0.07f; // Move down 7% per line
+	}
+
+	// Add back to menu instruction
+	auto backLabel = make_shared<GUILabel>("Press 'M' to return to Menu");
+	backLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+	backLabel->SetColor(GLVector3f(1, 1, 0)); // Yellow
+	mGameDisplay->GetContainer()->AddComponent(backLabel, GLVector2f(0.5f, 0.1f));
+	mHighScoreLabels.push_back(backLabel);
+
+}
+
+void Asteroids::HideHighScore()
+{
+	// Safely hide all high score labels
+	for (auto& label : mHighScoreLabels) {
+		if (label) {  // Check if label still exists
+			label->SetVisible(false);
+		}
+	}
+}
 void Asteroids::UpdateLabelLayout()
 {
 	float yPos = 0.8f; // Start near top for title
