@@ -28,6 +28,11 @@ public:
 	void AddListener(shared_ptr<IScoreListener> listener)
 	{
 		mListeners.push_back(listener);
+	}	
+	
+	void RemoveListener(shared_ptr<IScoreListener> listener)
+	{
+		mListeners.remove(listener);
 	}
 
 	void FireScoreChanged()
@@ -38,7 +43,8 @@ public:
 		}
 	}
 	void ResetScore() { mScore = 0; }
-
+	int GetScore() { return mScore; }
+	
 private:
 	int mScore;
 

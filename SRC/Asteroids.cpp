@@ -16,6 +16,7 @@
 #include "ExtraLives.h"
 #include "BlackHole.h"
 #include "BlackHoleCoin.h"
+#include <algorithm>
 
 // PUBLIC INSTANCE CONSTRUCTORS ///////////////////////////////////////////////
 
@@ -75,36 +76,39 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 {
 	const char lowerKey = tolower(key);
 
-	// State-independent commands
-	switch (lowerKey) {
-	case 'm': // Always returns to menu
-		if (mCurrentState != GameState::MENU) {
-			ReturnToMenu();
-		}
-		return;
+	if(!(mCurrentState == GameState::IN_GAME))
+	{ 
+		// State-independent commands
+		switch (lowerKey) {
+		case 'm': // Always returns to menu
+			if (mCurrentState != GameState::MENU) {
+				ReturnToMenu();
+			}
+			return;
 
-	case 'p': // Start game from menu or instructions
-		if (mCurrentState == GameState::INSTRUCTIONS) {
-			HideInstructions();
-			StartGame();
+		case 'p': // Start game from menu or instructions
+			if (mCurrentState == GameState::INSTRUCTIONS) {
+				HideInstructions();
+				StartGame();
+			}
+			else if (mCurrentState == GameState::MENU) {
+				HideMenu();
+				StartGame();
+			}
+			return;
+		case 'i':
+			if (mCurrentState == GameState::MENU) {
+				HideMenu();
+				ShowInstructions();
+			}
+			return;
+		case 'h':
+			if (mCurrentState == GameState::MENU) {
+				HideMenu();
+				ShowHighScore();
+			}
+			return;
 		}
-		else if (mCurrentState == GameState::MENU) {
-			HideMenu();
-			StartGame();
-		}
-		return;
-	case 'i':
-		if (mCurrentState == GameState::MENU) {
-			HideMenu();
-			ShowInstructions();
-		}
-		return;
-	case 'h':
-		if (mCurrentState == GameState::MENU) {
-			HideMenu();
-			ShowHighScore();
-		}
-		return;
 	}
 
 	// State-specific commands
@@ -124,6 +128,28 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 	case GameState::GAME_OVER:
 		// These states only handle 'm'
 		break;
+	}
+
+	if (mWaitingForNameInput) {
+		if (!mNameInputLabel) return;
+
+		if (key == 13) { // Enter key
+			if (!mPlayerName.empty()) {
+				AddHighScore(mPlayerName, mScoreKeeper.GetScore());
+			}
+			CleanupNameInput();
+			StopGame();
+			ShowHighScore();
+		}
+		else if (key == 8 && !mPlayerName.empty()) { // Backspace
+			mPlayerName.pop_back();
+			mNameInputLabel->SetText(mPlayerName);
+		}
+		else if (isalpha(key) && mPlayerName.length() < 10) { // Letter input
+			mPlayerName += key;
+			mNameInputLabel->SetText(mPlayerName);
+		}
+		return;
 	}
 }
 
@@ -164,6 +190,21 @@ void Asteroids::OnSpecialKeyReleased(int key, int x, int y)
 
 void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 {
+	if (mCurrentState == GameState::MENU ||
+		mCurrentState == GameState::INSTRUCTIONS ||
+		mCurrentState == GameState::HIGH_SCORES)
+	{
+		return;
+	}
+
+	if (object->GetType() == GameObjectType("ExtraLives")) {
+		if (mLivesLabel) {  // Check label exists
+			mPlayer.IncreaseLives();
+			mLivesLabel->SetText("Lives: " + std::to_string(mPlayer.GetLives()));
+		}
+		return;
+	}
+
 	if (object->GetType() == GameObjectType("ExtraLives")) {
 		mPlayer.IncreaseLives();
 		mLivesLabel->SetText("Lives: " + std::to_string(mPlayer.GetLives()));
@@ -265,6 +306,8 @@ void Asteroids::StartGame()
 	// i want the game to start here instead of start, so i can put the main menu over there
 	mCurrentState = GameState::IN_GAME;
 
+	
+
 	// Force immediate redraw
 	glutPostRedisplay();
 
@@ -300,6 +343,40 @@ void Asteroids::StartGame()
 	mPlayer.AddListener(thisPtr);
 }
 
+void Asteroids::StopGame()
+{
+    // Remove all listeners first
+    mGameWorld->RemoveListener(thisPtr.get());
+    mGameWorld->RemoveListener(&mPlayer);
+    mGameWorld->RemoveListener(&mScoreKeeper);
+    mScoreKeeper.RemoveListener(thisPtr);
+    mPlayer.RemoveListener(thisPtr);
+
+    // Clear all game objects
+    mGameWorld->ClearObjects();
+    mAsteroids.clear();
+    mAsteroidCount = 0;
+    mSpaceship.reset(); // Explicitly reset spaceship
+
+    // Reset game state
+    mLevel = 0;
+    mScoreKeeper.ResetScore();
+    mPlayer.ResetLives();
+
+    // Clean up any active name input
+    if (mWaitingForNameInput) {
+        CleanupNameInput();
+    }
+
+    // Reset UI elements
+    if (mScoreLabel) mScoreLabel->SetText("Score: 0");
+    if (mLivesLabel) mLivesLabel->SetText("Lives: " + std::to_string(mPlayer.GetLives()));
+    if (mGameOverLabel) mGameOverLabel->SetVisible(false);
+
+    // Force redraw
+    glutPostRedisplay();
+}
+
 void Asteroids::CreateBlackHole(int count)
 {
 	Animation* anim = AnimationManager::GetInstance().GetAnimationByName("wormhole");
@@ -333,28 +410,6 @@ void Asteroids::CreateAsteroids(int count) {
         mAsteroids.push_back(asteroid);
     }
     mAsteroidCount = mAsteroids.size();
-}
-
-void Asteroids::DeleteAllAsteroids() {
-	// Remove from game world
-	for (auto& asteroid : mAsteroids) {
-		mGameWorld->RemoveObject(asteroid);
-	}
-
-	// Clear container
-	mAsteroids.clear();
-	mAsteroidCount = 0;
-
-	// Reset game state
-	mScoreKeeper.ResetScore();
-	mPlayer.ResetLives();
-	mLevel = 0;
-
-	// Only update UI if labels exist
-	if (mScoreLabel && mLivesLabel) {
-		OnScoreChanged(0);
-		OnPlayerKilled(mPlayer.GetLives());
-	}
 }
 
 void Asteroids::SetupInputListeners()
@@ -402,7 +457,7 @@ void Asteroids::CreateGUI()
 	// Add the GUILabel to the GUIContainer  
 	shared_ptr<GUIComponent> game_over_component
 		= static_pointer_cast<GUIComponent>(mGameOverLabel);
-	mGameDisplay->GetContainer()->AddComponent(game_over_component, GLVector2f(0.5f, 0.5f));
+	mGameDisplay->GetContainer()->AddComponent(game_over_component, GLVector2f(0.5f, 0.f));
 
 }
 
@@ -411,7 +466,7 @@ void Asteroids::CreateMenu()
 {
 	InitializeResources();
 
-	mAsteroids.clear();
+	DeleteAllGameObjects();
 
 	//Create Menu asteroids
 	CreateAsteroids(12);
@@ -421,6 +476,33 @@ void Asteroids::CreateMenu()
 
 	// Force redraw
 	glutPostRedisplay();
+}
+
+void Asteroids::DeleteAllGameObjects()
+{
+	// Clear all game objects first
+	mGameWorld->ClearObjects();
+
+	// Clean up name input if active
+	if (mWaitingForNameInput) {
+		CleanupNameInput();
+	}
+
+	// Reset game state
+	mAsteroids.clear();
+	mAsteroidCount = 0;
+	mLevel = 0;
+
+	// Only update UI if labels still exist and game is running
+	if (mCurrentState != GameState::MENU &&
+		mCurrentState != GameState::INSTRUCTIONS &&
+		mCurrentState != GameState::HIGH_SCORES)
+	{
+		if (mScoreLabel) mScoreLabel->SetText("Score: 0");
+		if (mLivesLabel) mLivesLabel->SetText("Lives: " + std::to_string(mPlayer.GetLives()));
+	}
+
+	if (mGameOverLabel) mGameOverLabel->SetVisible(false);
 }
 
 void Asteroids::CreateMenuLabels()
@@ -517,50 +599,98 @@ void Asteroids::ShowInstructions()
 }
 
 void Asteroids::HideInstructions() {
-	DeleteAllAsteroids();
+	DeleteAllGameObjects();
 
 	for (auto& label : mInstructionLabels) {
 		label->SetVisible(false);
 	}
 }
 
-void Asteroids::ShowHighScore()
-{
-	// Clear any existing menu or game state
+void Asteroids::ShowHighScore() {
 	HideMenu();
 	mCurrentState = GameState::HIGH_SCORES;
+	LoadHighScores();
 
-	// Try to open the high scores file
-	ifstream file("highscores.txt");
-	vector<string> lines;
+	// Clear previous labels
+	for (auto& label : mHighScoreLabels) {
+		mGameDisplay->GetContainer()->RemoveComponent(label);
+	}
+	mHighScoreLabels.clear();
 
+	// Add title
+	auto title = make_shared<GUILabel>("HIGH SCORES");
+	title->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+	title->SetColor(GLVector3f(1, 1, 0)); // Yellow
+	mGameDisplay->GetContainer()->AddComponent(title, GLVector2f(0.5f, 0.9f));
+	mHighScoreLabels.push_back(title);
+
+	// Add scores (up to 5)
+	float yPos = 0.7f;
+	for (size_t i = 0; i < 5; i++) {
+		std::string text = std::to_string(i + 1) + ". ";
+		if (i < mHighScores.size()) {
+			text += mHighScores[i].first + " " + std::to_string(mHighScores[i].second);
+		}
+
+		auto label = make_shared<GUILabel>(text);
+		label->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+		label->SetColor(GLVector3f(1, 1, 1)); // White
+		mGameDisplay->GetContainer()->AddComponent(label, GLVector2f(0.5f, yPos));
+		mHighScoreLabels.push_back(label);
+		yPos -= 0.1f;
+	}
+
+	// Add return instruction
+	auto backLabel = make_shared<GUILabel>("Press 'M' to return to Menu");
+	backLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+	backLabel->SetColor(GLVector3f(0, 1, 0)); // Green
+	mGameDisplay->GetContainer()->AddComponent(backLabel, GLVector2f(0.5f, 0.2f));
+	mHighScoreLabels.push_back(backLabel);
+
+	glutPostRedisplay();
+}
+
+void Asteroids::LoadHighScores() {
+	mHighScores.clear();
+	std::ifstream file("HighScore.txt");
 	if (file.is_open()) {
-		string line;
-		while (getline(file, line)) {
-			lines.push_back(line);
-			if (lines.size() >= 11) break; // Only show first 10 scores + title
+		std::string line;
+		while (std::getline(file, line) && mHighScores.size() < 5) {
+			size_t spacePos = line.find(' ');
+			if (spacePos != std::string::npos) {
+				std::string name = line.substr(0, spacePos);
+				int score = std::stoi(line.substr(spacePos + 1));
+				mHighScores.emplace_back(name, score);
+			}
 		}
 		file.close();
 	}
+}
 
-	// Create and position labels
-	float yPos = 0.9f; // Start near top (10% from top)
-	for (const string& line : lines) {
-		auto label = make_shared<GUILabel>(line);
-		label->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
-		label->SetColor(GLVector3f(1, 1, 1)); // White text
-		mGameDisplay->GetContainer()->AddComponent(label, GLVector2f(0.5f, yPos));
-		mHighScoreLabels.push_back(label);
-		yPos -= 0.07f; // Move down 7% per line
+void Asteroids::SaveHighScores() {
+	std::ofstream file("HighScore.txt");
+	if (file.is_open()) {
+		for (const auto& entry : mHighScores) {
+			file << entry.first << " " << entry.second << "\n";
+		}
+		file.close();
+	}
+}
+
+void Asteroids::AddHighScore(const std::string& name, int score) {
+	// Add new score
+	mHighScores.emplace_back(name, score);
+
+	// Sort descending by score
+	std::sort(mHighScores.begin(), mHighScores.end(),
+		[](const auto& a, const auto& b) { return b.second < a.second; });
+
+	// Keep only top 5
+	if (mHighScores.size() > 5) {
+		mHighScores.resize(5);
 	}
 
-	// Add back to menu instruction
-	auto backLabel = make_shared<GUILabel>("Press 'M' to return to Menu");
-	backLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
-	backLabel->SetColor(GLVector3f(1, 1, 0)); // Yellow
-	mGameDisplay->GetContainer()->AddComponent(backLabel, GLVector2f(0.5f, 0.1f));
-	mHighScoreLabels.push_back(backLabel);
-
+	SaveHighScores();
 }
 
 void Asteroids::HideHighScore()
@@ -627,7 +757,7 @@ void Asteroids::DrawMenuTitle()
 
 void Asteroids::HideMenu()
 {
-	DeleteAllAsteroids();
+	DeleteAllGameObjects();
 
 	// Hide all labels 
 	for (auto& label : mMenuLabels) {
@@ -675,20 +805,51 @@ void Asteroids::OnPlayerKilled(int lives_left)
 	explosion->SetRotation(mSpaceship->GetRotation());
 	mGameWorld->AddObject(explosion);
 
-	// Format the lives left message using an string-based stream
-	ostringstream msg_stream;
-	msg_stream << "Lives: " << lives_left;
-	// Get the lives left message as a string
-	string lives_msg = msg_stream.str();
-	mLivesLabel->SetText(lives_msg);
+	mLivesLabel->SetText("Lives: " + std::to_string(lives_left));
 
-	if (lives_left > 0) 
-	{ 
-		SetTimer(1000, CREATE_NEW_PLAYER); 
+	if (lives_left > 0)
+	{
+		SetTimer(1000, CREATE_NEW_PLAYER);
 	}
 	else
 	{
-		SetTimer(500, SHOW_GAME_OVER);
+		// Show game over and prompt for name
+		mGameOverLabel->SetText("GAME OVER");
+		mGameOverLabel->SetVisible(true);
+		ShowNameInput();
+	}
+}
+
+void Asteroids::ShowNameInput()
+{
+	mWaitingForNameInput = true;
+	mPlayerName.clear();
+
+	// Create input prompt
+	mEnterNameLabel = make_shared<GUILabel>("Enter your name (Press ENTER when done):");
+	mEnterNameLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+	mEnterNameLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_MIDDLE);
+	mEnterNameLabel->SetColor(GLVector3f(1, 1, 0));
+	mGameDisplay->GetContainer()->AddComponent(mEnterNameLabel, GLVector2f(0.5f, 0.6f));
+
+	// Create label that will show the name as it's typed
+	mNameInputLabel = make_shared<GUILabel>("");
+	mNameInputLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+	mNameInputLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_MIDDLE);
+	mNameInputLabel->SetColor(GLVector3f(1, 1, 1));
+	mGameDisplay->GetContainer()->AddComponent(mNameInputLabel, GLVector2f(0.5f, 0.5f));
+}
+
+void Asteroids::CleanupNameInput()
+{
+	mWaitingForNameInput = false;
+	if (mNameInputLabel) {
+		mGameDisplay->GetContainer()->RemoveComponent(mNameInputLabel);
+		mNameInputLabel.reset();
+	}
+	if (mEnterNameLabel) {
+		mGameDisplay->GetContainer()->RemoveComponent(mEnterNameLabel);
+		mEnterNameLabel.reset();
 	}
 }
 

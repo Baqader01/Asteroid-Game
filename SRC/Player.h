@@ -31,6 +31,12 @@ public:
 		mListeners.push_back(listener);
 	}
 
+	void RemoveListener(shared_ptr<IPlayerListener> listener)
+	{
+		mListeners.remove(listener);
+	}
+
+
 	void FirePlayerKilled()
 	{
 		// Send message to all listeners

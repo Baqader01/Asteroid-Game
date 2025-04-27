@@ -40,7 +40,7 @@ public:
 	};
 
 	void CreateAsteroids(int count);
-	void DeleteAllAsteroids();
+	void DeleteAllGameObjects();
 
 	void SetupInputListeners();
 	
@@ -58,6 +58,8 @@ public:
 	// Declaration of the IPlayerLister interface //////////////////////////////
 
 	void OnPlayerKilled(int lives_left);
+	void ShowNameInput();
+	void CleanupNameInput();
 
 	// Declaration of IGameWorldListener interface //////////////////////////////
 
@@ -85,24 +87,31 @@ public:
 	void HideHighScore();
 
 private:
-	GameState mCurrentState;
-
-	shared_ptr<Spaceship> mSpaceship;
-	shared_ptr<GUILabel> mScoreLabel;
-	shared_ptr<GUILabel> mLivesLabel;
-	shared_ptr<GUILabel> mGameOverLabel;
-	shared_ptr<GUILabel> mInstructionsLabel;
-
-	shared_ptr<Asteroids> mSelfPtr; // Prevents deletion while listening
-
-	vector<shared_ptr<GUILabel>> mMenuLabels;
-
 	void InitializeResources();
+
+	void LoadHighScores();
+	void SaveHighScores();
+	void AddHighScore(const std::string& name, int score);
 
 	void CreateMenuLabels();
 	void UpdateLabelLayout();
 	void DrawMenuTitle();
 
+	bool mWaitingForNameInput = false;
+	string mPlayerName;
+	shared_ptr<GUILabel> mNameInputLabel;
+	shared_ptr<GUILabel> mEnterNameLabel;
+
+	GameState mCurrentState;
+	shared_ptr<Spaceship> mSpaceship;
+	shared_ptr<GUILabel> mScoreLabel;
+	shared_ptr<GUILabel> mLivesLabel;
+	shared_ptr<GUILabel> mGameOverLabel;
+	shared_ptr<GUILabel> mInstructionsLabel;
+	shared_ptr<Asteroids> mSelfPtr; // Prevents deletion while listening
+
+	vector<pair<string, int>> mHighScores;
+	vector<shared_ptr<GUILabel>> mMenuLabels;
 	vector<shared_ptr<GUILabel>> mInstructionLabels;
 	vector<shared_ptr<GUILabel>> mHighScoreLabels;
 
@@ -124,6 +133,7 @@ private:
 	
 	// to start fighting the astroids
 	void StartGame();
+	void StopGame();
 
 	void CreateBlackHole(int count);
 
