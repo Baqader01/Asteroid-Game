@@ -17,7 +17,7 @@ public:
 	void SetTimeToLive(int ttl) { mTimeToLive = ttl; }
 	int GetTimeToLive(void) { return mTimeToLive; }
 
-	bool CollisionTest(shared_ptr<GameObject> o);
+	bool CollisionTest(shared_ptr<GameObject> o);	
 	void OnCollision(const GameObjectList& objects);
 
 protected:

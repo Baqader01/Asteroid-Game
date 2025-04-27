@@ -112,6 +112,7 @@
     <ClCompile Include="..\..\SRC\ExtraLives.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\Spaceship.cpp" />
+    <ClCompile Include="..\..\SRC\WeaponPowerUp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\SRC\Asteroid.h" />
@@ -124,6 +125,7 @@
     <ClInclude Include="..\..\SRC\ExtraLives.h" />
     <ClInclude Include="..\..\SRC\Player.h" />
     <ClInclude Include="..\..\src\Spaceship.h" />
+    <ClInclude Include="..\..\SRC\WeaponPowerUp.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine\Engine.vcxproj">

@@ -14,6 +14,7 @@
 #include "Explosion.h"
 #include <Windows.h>
 #include "ExtraLives.h"
+#include "WeaponPowerUp.h"
 #include "BlackHole.h"
 #include "BlackHoleCoin.h"
 #include <algorithm>
@@ -68,6 +69,20 @@ void Asteroids::CreateExtraLives(int count) {
 		extraLife->SetScale(0.1f);  // Add scaling
 
 		mGameWorld->AddObject(extraLife);
+	}
+}
+
+void Asteroids::CreateBulletPowerUp(int count) {
+	Animation* anim = AnimationManager::GetInstance().GetAnimationByName("WeaponPowerUp");
+	if (!anim) return;
+
+	for (int i = 0; i < count; i++) {
+		auto powerUp = make_shared<WeaponPowerUp>();
+		powerUp->SetBoundingShape(make_shared<BoundingSphere>(powerUp->GetThisPtr(), 1));
+		auto sprite = make_shared<Sprite>(anim->GetWidth(), anim->GetHeight(), anim);
+		powerUp->SetSprite(sprite);
+		powerUp->SetScale(0.1f);
+		mGameWorld->AddObject(powerUp);
 	}
 }
 
@@ -265,6 +280,7 @@ void Asteroids::OnTimer(int value)
 		mLevel++;
 		int num_asteroids = 10 + 2 * mLevel;
 		CreateAsteroids(num_asteroids);
+		//CreateBulletPowerUp(2);
 		CreateBlackHole(2);
 		CreateExtraLives(2);
 	}
@@ -461,9 +477,9 @@ void Asteroids::CreateGUI()
 
 }
 
-// my function
 void Asteroids::CreateMenu()
 {
+	//load resources
 	InitializeResources();
 
 	DeleteAllGameObjects();
@@ -729,6 +745,9 @@ void Asteroids::InitializeResources()
 	AnimationManager::GetInstance().CreateAnimationFromFile("explosion", 64, 1024, 64, 64, "explosion_fs.png");
 	AnimationManager::GetInstance().CreateAnimationFromFile("asteroid1", 128, 8192, 128, 128, "asteroid1_fs.png");
 	AnimationManager::GetInstance().CreateAnimationFromFile("spaceship", 128, 128, 128, 128, "spaceship_fs.png");
+
+	https://wenrexa.itch.io/laser2020
+	AnimationManager::GetInstance().CreateAnimationFromFile("WeaponPowerUp", 122, 119, 128, 128, "PowerupBullet.png");
 
 	//Hansjörg Malthaner : http://opengameart.org/users/varkalandar
 	AnimationManager::GetInstance().CreateAnimationFromFile("wormhole", 128, 96, 128, 96, "Wormhole.png");

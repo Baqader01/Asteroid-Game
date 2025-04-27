@@ -31,6 +31,8 @@ public:
 
 	void CreateExtraLives(int count);
 
+	void CreateBulletPowerUp(int count);
+
 	enum class GameState {
 		MENU,
 		IN_GAME,
@@ -96,6 +98,9 @@ private:
 	void CreateMenuLabels();
 	void UpdateLabelLayout();
 	void DrawMenuTitle();
+
+	int mWeaponLevel = 1; // Start with basic weapon
+	const int MAX_WEAPON_LEVEL = 3; // Maximum upgrade level
 
 	bool mWaitingForNameInput = false;
 	string mPlayerName;

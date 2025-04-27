@@ -12,6 +12,7 @@ using namespace std;
 Spaceship::Spaceship()
 	: GameObject("Spaceship"), mThrust(0)
 {
+	mWeaponLevel = 1;
 }
 
 /** Construct a spaceship with given position, velocity, acceleration, angle, and rotation. */
@@ -73,25 +74,39 @@ void Spaceship::Shoot(void)
 {
 	// Check the world exists
 	if (!mWorld) return;
-	// Construct a unit length vector in the direction the spaceship is headed
-	GLVector3f spaceship_heading(cos(DEG2RAD*mAngle), sin(DEG2RAD*mAngle), 0);
-	spaceship_heading.normalize();
-	// Calculate the point at the node of the spaceship from position and heading
-	GLVector3f bullet_position = mPosition + (spaceship_heading * 4);
-	// Calculate how fast the bullet should travel
-	float bullet_speed = 30;
-	// Construct a vector for the bullet's velocity
-	GLVector3f bullet_velocity = mVelocity + spaceship_heading * bullet_speed;
-	// Construct a new bullet
-	shared_ptr<GameObject> bullet
-		(new Bullet(bullet_position, bullet_velocity, mAcceleration, mAngle, 0, 2000));
-	bullet->SetBoundingShape(make_shared<BoundingSphere>(bullet->GetThisPtr(), 2.0f));
-	bullet->SetShape(mBulletShape);
-	// Add the new bullet to the game world
-	mWorld->AddObject(bullet);
 
+	// Weapon level 1 - single shot
+	if (mWeaponLevel == 1) {
+		FireSingleBullet(0); // Center shot
+	}
+	// Weapon level 2 - double shot
+	else if (mWeaponLevel == 2) {
+		FireSingleBullet(-10); // Left offset
+		FireSingleBullet(10);  // Right offset
+	}
+	// Weapon level 3 - triple shot
+	else if (mWeaponLevel >= 3) {
+		FireSingleBullet(0);   // Center
+		FireSingleBullet(-20); // Left
+		FireSingleBullet(20);  // Right
+	}
 }
 
+void Spaceship::FireSingleBullet(float angleOffset)
+{
+	GLVector3f spaceship_heading(cos(DEG2RAD * (mAngle + angleOffset)),
+		sin(DEG2RAD * (mAngle + angleOffset)), 0);
+	spaceship_heading.normalize();
+
+	GLVector3f bullet_position = mPosition + (spaceship_heading * 4);
+	GLVector3f bullet_velocity = mVelocity + spaceship_heading * 30; // 30 = bullet speed
+
+	shared_ptr<GameObject> bullet(new Bullet(bullet_position, bullet_velocity,
+		mAcceleration, mAngle + angleOffset, 0, 2000));
+	bullet->SetBoundingShape(make_shared<BoundingSphere>(bullet->GetThisPtr(), 2.0f));
+	bullet->SetShape(mBulletShape);
+	mWorld->AddObject(bullet);
+}
 bool Spaceship::CollisionTest(shared_ptr<GameObject> o)
 {
 	// Allow collisions with Asteroids and ExtraLives
