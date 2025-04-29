@@ -110,6 +110,7 @@
     <ClCompile Include="..\..\src\Bullet.cpp" />
     <ClCompile Include="..\..\SRC\Explosion.cpp" />
     <ClCompile Include="..\..\SRC\ExtraLives.cpp" />
+    <ClCompile Include="..\..\SRC\HighScore.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\Spaceship.cpp" />
     <ClCompile Include="..\..\SRC\WeaponPowerUp.cpp" />
@@ -123,6 +124,7 @@
     <ClInclude Include="..\..\src\Bullet.h" />
     <ClInclude Include="..\..\SRC\Explosion.h" />
     <ClInclude Include="..\..\SRC\ExtraLives.h" />
+    <ClInclude Include="..\..\SRC\HighScore.h" />
     <ClInclude Include="..\..\SRC\Player.h" />
     <ClInclude Include="..\..\src\Spaceship.h" />
     <ClInclude Include="..\..\SRC\WeaponPowerUp.h" />

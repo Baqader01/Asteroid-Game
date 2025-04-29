@@ -15,5 +15,5 @@ public:
 private:
     float mGravityRadius;
     float mGravityForce;
-    int mLifetime; // How long the black hole lasts
+    int mLifetime;
 };
