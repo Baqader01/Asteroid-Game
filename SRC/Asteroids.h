@@ -79,6 +79,19 @@ private:
 	void CreateMenu();
 	void CreateInstructions();
 	void CreateHighScore();
+	void CreateGameOver();
+
+	void AddHighScore(const std::string& name, int score);
+
+	void ShowNameInput();
+	void CleanupNameInput();
+
+	void HandleNameInput(uchar key);
+
+	bool mWaitingForNameInput = false;
+	string mPlayerName;
+	shared_ptr<GUILabel> mNameInputLabel;
+	shared_ptr<GUILabel> mEnterNameLabel;
 
 	void DeleteLabels();
 

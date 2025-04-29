@@ -143,6 +143,27 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 			return;
 		}
 	}
+
+	if (mWaitingForNameInput) {
+		if (!mNameInputLabel) return;
+
+		if (key == 13) { // Enter key
+			if (!mPlayerName.empty()) {
+				AddHighScore(mPlayerName, mScoreKeeper.GetScore());
+			}
+			CleanupNameInput();
+			CreateHighScore();
+		}
+		else if (key == 8 && !mPlayerName.empty()) { // Backspace
+			mPlayerName.pop_back();
+			mNameInputLabel->SetText(mPlayerName);
+		}
+		else if (isalpha(key) && mPlayerName.length() < 10) { // Letter input
+			mPlayerName += key;
+			mNameInputLabel->SetText(mPlayerName);
+		}
+		return;
+	}
 }
 
 void Asteroids::OnKeyReleased(uchar key, int x, int y) {}
@@ -460,6 +481,77 @@ void Asteroids::CreateHighScore()
 	glutPostRedisplay();
 }
 
+void Asteroids::CreateGameOver()
+{
+	DeleteLabels();
+	mWaitingForNameInput = true;
+
+	// Create input prompt
+	mEnterNameLabel = make_shared<GUILabel>("Enter your name (Press ENTER when done):");
+	mEnterNameLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+	mEnterNameLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_MIDDLE);
+	mEnterNameLabel->SetColor(GLVector3f(1, 1, 0));
+	mGameDisplay->GetContainer()->AddComponent(mEnterNameLabel, GLVector2f(0.5f, 0.6f));
+
+	// Create label that will show the name as it's typed
+	mNameInputLabel = make_shared<GUILabel>("");
+	mNameInputLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+	mNameInputLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_MIDDLE);
+	mNameInputLabel->SetColor(GLVector3f(1, 1, 1));
+	mGameDisplay->GetContainer()->AddComponent(mNameInputLabel, GLVector2f(0.5f, 0.5f));
+
+	mLabels.push_back(mEnterNameLabel);
+	mLabels.push_back(mEnterNameLabel);
+}
+
+void Asteroids::AddHighScore(const std::string& name, int score)
+{
+	// Add the new score
+	highScores.Add(name, score);
+
+	// Immediately save to file
+	highScores.Save("HighScore.txt");
+
+	// Refresh the display if we're currently showing highscores
+	if (mCurrentState == GameState::HIGH_SCORES) {
+		CreateHighScore(); // Rebuild the display
+	}
+}
+
+void Asteroids::ShowNameInput()
+{
+	mWaitingForNameInput = true;
+	mPlayerName.clear();
+
+	// Create input prompt
+	mEnterNameLabel = make_shared<GUILabel>("Enter your name (Press ENTER when done):");
+	mEnterNameLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+	mEnterNameLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_MIDDLE);
+	mEnterNameLabel->SetColor(GLVector3f(1, 1, 0));
+	mGameDisplay->GetContainer()->AddComponent(mEnterNameLabel, GLVector2f(0.5f, 0.6f));
+
+	// Create label that will show the name as it's typed
+	mNameInputLabel = make_shared<GUILabel>("");
+	mNameInputLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+	mNameInputLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_MIDDLE);
+	mNameInputLabel->SetColor(GLVector3f(1, 1, 1));
+	mGameDisplay->GetContainer()->AddComponent(mNameInputLabel, GLVector2f(0.5f, 0.5f));
+}
+
+void Asteroids::CleanupNameInput()
+{
+	mWaitingForNameInput = false;
+	if (mNameInputLabel) {
+		mGameDisplay->GetContainer()->RemoveComponent(mNameInputLabel);
+		mNameInputLabel.reset();
+	}
+	if (mEnterNameLabel) {
+		mGameDisplay->GetContainer()->RemoveComponent(mEnterNameLabel);
+		mEnterNameLabel.reset();
+	}
+}
+
+
 void Asteroids::DeleteLabels()
 {
 	auto container = mGameDisplay->GetContainer();
@@ -513,7 +605,10 @@ void Asteroids::OnPlayerKilled(int lives_left)
 	}
 	else
 	{
-		SetTimer(500, SHOW_GAME_OVER);
+		// Show game over and prompt for name
+		mGameOverLabel->SetText("GAME OVER");
+		mGameOverLabel->SetVisible(true);
+		CreateGameOver();
 	}
 }
 
