@@ -75,8 +75,6 @@ void Asteroids::Start()
 
 	// Create some asteroids and add them to the world
 	CreateAsteroids(10);
-	CreateExtraLives(2);
-	CreateBlackHole(2);
 
 	// Add a player (watcher) to the game world
 	mGameWorld->AddListener(&mPlayer);
@@ -90,9 +88,13 @@ void Asteroids::Start()
 
 void Asteroids::StartGame() 
 {
+	DeleteLabels();
 	mCurrentState = GameState::IN_GAME;
 
-	DeleteLabels();
+	// Only create power-ups if they're enabled
+	if (mEnableExtraLives) CreateExtraLives(2);
+	if (mEnableBlackHoles) CreateBlackHole(2);
+
 
 	//Create the GUI
 	CreateGUI();
@@ -126,6 +128,21 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 			break;
 		}
 	}
+	else if (mCurrentState == GameState::DIFFICULTY) {
+		switch (tolower(key)) {
+		case 'l':
+			mEnableExtraLives = !mEnableExtraLives;
+			CreateDifficulty(); // Refresh display
+			break;
+		case 'b':
+			mEnableBlackHoles = !mEnableBlackHoles;
+			CreateDifficulty(); // Refresh display
+			break;
+		case 'm':
+			CreateMenu();
+			break;
+		}
+	}
 	else
 	{
 		switch (lowerKey) {
@@ -135,6 +152,10 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 		case 'p':
 			StartGame();
 			return;
+		case 'd':
+			CreateDifficulty();
+			return;
+
 		case 'i':
 			CreateInstructions();
 			return;
@@ -258,8 +279,10 @@ void Asteroids::OnTimer(int value)
 		mLevel++;
 		int num_asteroids = 10 + 2 * mLevel;
 		CreateAsteroids(num_asteroids);
-		CreateExtraLives(2);
-		CreateBlackHole(2);
+
+		// Only create power-ups if they're enabled
+		if (mEnableExtraLives) CreateExtraLives(2);
+		if (mEnableBlackHoles) CreateBlackHole(2);
 	}
 
 	if (value == SHOW_GAME_OVER)
@@ -504,6 +527,50 @@ void Asteroids::CreateGameOver()
 	mLabels.push_back(mEnterNameLabel);
 }
 
+void Asteroids::CreateDifficulty()
+{
+	DeleteLabels();
+	mCurrentState = GameState::DIFFICULTY;
+
+	float yPos = 0.8f;
+	const float spacing = 0.15f;
+
+	// Title
+	auto title = make_shared<GUILabel>("DIFFICULTY SETTINGS");
+	title->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+	title->SetColor(GLVector3f(0, 1, 0)); // Green
+	mGameDisplay->GetContainer()->AddComponent(title, GLVector2f(0.5f, yPos));
+	mLabels.push_back(title);
+	yPos -= spacing;
+
+	// Extra Lives Toggle
+	string livesText = "Extra Lives: " + string(mEnableExtraLives ? "ON (Press L)" : "OFF (Press L)");
+	auto livesLabel = make_shared<GUILabel>(livesText);
+	livesLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+	livesLabel->SetColor(GLVector3f(1, 1, 1));
+	mGameDisplay->GetContainer()->AddComponent(livesLabel, GLVector2f(0.5f, yPos));
+	mLabels.push_back(livesLabel);
+	yPos -= spacing;
+
+	// Black Holes Toggle
+	string holesText = "Black Holes: " + string(mEnableBlackHoles ? "ON (Press B)" : "OFF (Press B)");
+	auto holesLabel = make_shared<GUILabel>(holesText);
+	holesLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+	holesLabel->SetColor(GLVector3f(1, 1, 1));
+	mGameDisplay->GetContainer()->AddComponent(holesLabel, GLVector2f(0.5f, yPos));
+	mLabels.push_back(holesLabel);
+	yPos -= spacing;
+
+	// Back to menu
+	auto backLabel = make_shared<GUILabel>("Press M to return to Menu");
+	backLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+	backLabel->SetColor(GLVector3f(1, 1, 0)); // Yellow
+	mGameDisplay->GetContainer()->AddComponent(backLabel, GLVector2f(0.5f, yPos));
+	mLabels.push_back(backLabel);
+
+	glutPostRedisplay();
+}
+
 void Asteroids::AddHighScore(const std::string& name, int score)
 {
 	// Add the new score
@@ -623,7 +690,3 @@ shared_ptr<GameObject> Asteroids::CreateExplosion()
 	explosion->Reset();
 	return explosion;
 }
-
-
-
-

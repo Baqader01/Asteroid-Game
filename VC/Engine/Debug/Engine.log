@@ -1,17 +1,16 @@
 ﻿cl : command line  warning D9035: option 'Gm' has been deprecated and will be removed in a future release
+  Sprite.cpp
+  MovementController.cpp
   GlutWindow.cpp
   GlutSession.cpp
   GameWorld.cpp
   GameWindow.cpp
   GameSession.cpp
-  GUILabel.cpp
-  Generating Code...
-  Skipping... (no relevant changes detected)
-  Sprite.cpp
-  MovementController.cpp
   GameObject.cpp
   GameDisplay.cpp
+  GUILabel.cpp
   GUIIcon.cpp
   GUIContainer.cpp
   GUIComponent.cpp
+  Generating Code...
   Engine.vcxproj -> C:\Users\smbaq\Documents\GitHub\Asteroid-Game\lib\Engine.lib
