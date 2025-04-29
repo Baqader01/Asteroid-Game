@@ -63,7 +63,7 @@ private:
 	shared_ptr<GUILabel> mLivesLabel;
 	shared_ptr<GUILabel> mGameOverLabel;
 
-	vector<shared_ptr<GUILabel>> mMenuLabels;
+	vector<shared_ptr<GUILabel>> mLabels;
 
 	GameState mCurrentState;
 
@@ -74,6 +74,8 @@ private:
 	shared_ptr<GameObject> CreateSpaceship();
 	void CreateGUI();
 	void CreateMenu();
+
+	void CreateInstructions();
 
 	void DeleteMenu();
 

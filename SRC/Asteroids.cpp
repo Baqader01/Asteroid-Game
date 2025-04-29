@@ -111,16 +111,11 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 			return;
 
 		case 'p': // Start game from menu or instructions
-			//if (mCurrentState == GameState::INSTRUCTIONS) {
-				//HideInstructions();
-				//StartGame();
-			//}
 			StartGame();
 			
 			return;
 		case 'i':
-			//HideMenu();
-			//ShowInstructions();
+			CreateInstructions();
 
 			return;
 		case 'h':
@@ -129,15 +124,16 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 			return;
 		}
 	}
-
-
-	switch (key)
+	else if (mCurrentState == GameState::IN_GAME)
 	{
-	case ' ':
-		mSpaceship->Shoot();
-		break;
-	default:
-		break;
+		switch (key)
+		{
+		case ' ':
+			mSpaceship->Shoot();
+			break;
+		default:
+			break;
+		}
 	}
 }
 
@@ -292,7 +288,7 @@ void Asteroids::CreateGUI()
 
 void Asteroids::CreateMenu()
 {
-	mMenuLabels.clear();
+	mLabels.clear();
 
 	// Title and menu items with their colors
 	const std::vector<std::pair<std::string, GLVector3f>> menuItems = {
@@ -317,9 +313,48 @@ void Asteroids::CreateMenu()
 			static_pointer_cast<GUIComponent>(label);
 		mGameDisplay->GetContainer()->AddComponent(label_component, GLVector2f(0.5f, yPos));
 
-		mMenuLabels.push_back(label);
+		mLabels.push_back(label);
 		yPos -= spacing;
 	}
+}
+
+void Asteroids::CreateInstructions()
+{
+	// Clear any existing menu or game state
+	DeleteMenu();
+	mCurrentState = GameState::INSTRUCTIONS;
+
+	// Instruction text lines
+	vector<string> instructions = {
+		"HOW TO PLAY",
+		"------------------",
+		"Movement:",
+		"UP ARROW - Thrust Forward",
+		"LEFT/RIGHT ARROWS - Rotate",
+		"",
+		"Actions:",
+		"SPACEBAR - Fire Laser",
+		"",
+		"Objective:",
+		"Destroy all asteroids!",
+		"Avoid collisions with them.",
+		"M - Return to Menu"
+
+	};
+
+	// Create and position labels
+	float yPos = 0.9f; // Start near top (10% from top)
+	for (const string& line : instructions) {
+		auto label = make_shared<GUILabel>(line);
+		label->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+		label->SetColor(GLVector3f(1, 1, 1)); // White text
+		mGameDisplay->GetContainer()->AddComponent(label, GLVector2f(0.5f, yPos));
+		mLabels.push_back(label);
+		yPos -= 0.07f; // Move down 7% per line
+	}
+
+	// Force immediate redraw
+	glutPostRedisplay();
 }
 
 void Asteroids::DeleteMenu()
@@ -327,14 +362,14 @@ void Asteroids::DeleteMenu()
 	auto container = mGameDisplay->GetContainer();
 
 	// Remove from container 
-	for (auto& label : mMenuLabels) {
+	for (auto& label : mLabels) {
 		if (label) {
 			// Remove from display container
 			mGameDisplay->GetContainer()->RemoveComponent(
 				static_pointer_cast<GUIComponent>(label));
 		}
 	}
-	mMenuLabels.clear();
+	mLabels.clear();
 	// Then clear the vector
 
 	glutPostRedisplay();
