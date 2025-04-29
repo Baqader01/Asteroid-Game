@@ -25,6 +25,14 @@ public:
 	void StartGame();
 	virtual void Stop(void);
 
+	enum class GameState {
+		MENU,
+		IN_GAME,
+		INSTRUCTIONS,
+		HIGH_SCORES,
+		GAME_OVER
+	};
+
 	// Declaration of IKeyboardListener interface ////////////////////////////////
 
 	void OnKeyPressed(uchar key, int x, int y);
@@ -57,6 +65,8 @@ private:
 
 	vector<shared_ptr<GUILabel>> mMenuLabels;
 
+	GameState mCurrentState;
+
 	uint mLevel;
 	uint mAsteroidCount;
 
@@ -64,6 +74,8 @@ private:
 	shared_ptr<GameObject> CreateSpaceship();
 	void CreateGUI();
 	void CreateMenu();
+
+	void DeleteMenu();
 
 	void CreateAsteroids(const uint num_asteroids);
 	shared_ptr<GameObject> CreateExplosion();

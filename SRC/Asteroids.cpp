@@ -12,11 +12,13 @@
 #include "GUILabel.h"
 #include "Explosion.h"
 
+#include <Windows.h>
+
 // PUBLIC INSTANCE CONSTRUCTORS ///////////////////////////////////////////////
 
 /** Constructor. Takes arguments from command line, just in case. */
 Asteroids::Asteroids(int argc, char *argv[])
-	: GameSession(argc, argv)
+	: GameSession(argc, argv), mCurrentState(GameState::MENU)
 {
 	mLevel = 0;
 	mAsteroidCount = 0;
@@ -64,8 +66,6 @@ void Asteroids::Start()
 	// Create some asteroids and add them to the world
 	CreateAsteroids(10);
 
-	CreateMenu();
-
 	// Add a player (watcher) to the game world
 	mGameWorld->AddListener(&mPlayer);
 
@@ -78,6 +78,10 @@ void Asteroids::Start()
 
 void Asteroids::StartGame() 
 {
+	mCurrentState = GameState::IN_GAME;
+
+	DeleteMenu();
+
 	//Create the GUI
 	CreateGUI();
 
@@ -96,6 +100,37 @@ void Asteroids::Stop()
 
 void Asteroids::OnKeyPressed(uchar key, int x, int y)
 {
+	const char lowerKey = tolower(key);
+
+	if (mCurrentState == GameState::MENU) {
+
+		// State-independent commands
+		switch (lowerKey) {
+		case 'm': 
+			//ReturnToMenu();
+			return;
+
+		case 'p': // Start game from menu or instructions
+			//if (mCurrentState == GameState::INSTRUCTIONS) {
+				//HideInstructions();
+				//StartGame();
+			//}
+			StartGame();
+			
+			return;
+		case 'i':
+			//HideMenu();
+			//ShowInstructions();
+
+			return;
+		case 'h':
+			//HideMenu();
+			//ShowHighScore();
+			return;
+		}
+	}
+
+
 	switch (key)
 	{
 	case ' ':
@@ -269,20 +304,40 @@ void Asteroids::CreateMenu()
 		{"Press 'M' to go back to the menu", GLVector3f(1, 1, 1)}
 	};
 
-	float yPos = 0.8f;  // Start position for title at top
+	float yPos = 0.8f;
 	const float spacing = 0.15f;
 
 	for (const auto& item : menuItems) {
-		auto label = std::make_shared<GUILabel>(item.first);
+		auto label = make_shared<GUILabel>(item.first);
 		label->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
 		label->SetColor(item.second);
 
-		mGameDisplay->GetContainer()->RemoveComponent(label);
-		mGameDisplay->GetContainer()->AddComponent(label, GLVector2f(0.5f, yPos));
+		// Properly cast to GUIComponent before adding
+		shared_ptr<GUIComponent> label_component =
+			static_pointer_cast<GUIComponent>(label);
+		mGameDisplay->GetContainer()->AddComponent(label_component, GLVector2f(0.5f, yPos));
 
 		mMenuLabels.push_back(label);
-		yPos -= spacing;  // Move down for next item
+		yPos -= spacing;
 	}
+}
+
+void Asteroids::DeleteMenu()
+{
+	auto container = mGameDisplay->GetContainer();
+
+	// Remove from container 
+	for (auto& label : mMenuLabels) {
+		if (label) {
+			// Remove from display container
+			mGameDisplay->GetContainer()->RemoveComponent(
+				static_pointer_cast<GUIComponent>(label));
+		}
+	}
+	mMenuLabels.clear();
+	// Then clear the vector
+
+	glutPostRedisplay();
 }
 
 void Asteroids::OnScoreChanged(int score)
