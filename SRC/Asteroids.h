@@ -9,6 +9,7 @@
 #include "ScoreKeeper.h"
 #include "Player.h"
 #include "IPlayerListener.h"
+#include "HighScore.h"
 #include <vector>
 
 class GameObject;
@@ -63,6 +64,7 @@ private:
 	shared_ptr<GUILabel> mLivesLabel;
 	shared_ptr<GUILabel> mGameOverLabel;
 
+	HighScoreSystem highScores;
 	vector<shared_ptr<GUILabel>> mLabels;
 
 	GameState mCurrentState;
@@ -73,9 +75,10 @@ private:
 	void ResetSpaceship();
 	shared_ptr<GameObject> CreateSpaceship();
 	void CreateGUI();
-	void CreateMenu();
 
+	void CreateMenu();
 	void CreateInstructions();
+	void CreateHighScore();
 
 	void DeleteMenu();
 

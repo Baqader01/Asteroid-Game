@@ -102,29 +102,23 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 {
 	const char lowerKey = tolower(key);
 
-	if (mCurrentState == GameState::MENU) {
+	switch (lowerKey) {
+	case 'm':
+		CreateMenu();
+		return;
+	case 'p':
+		StartGame();
 
-		// State-independent commands
-		switch (lowerKey) {
-		case 'm': 
-			//ReturnToMenu();
-			return;
-
-		case 'p': // Start game from menu or instructions
-			StartGame();
-			
-			return;
-		case 'i':
-			CreateInstructions();
-
-			return;
-		case 'h':
-			//HideMenu();
-			//ShowHighScore();
-			return;
-		}
+		return;
+	case 'i':
+		CreateInstructions();
+		return;
+	case 'h':
+		CreateHighScore();
+		return;
 	}
-	else if (mCurrentState == GameState::IN_GAME)
+
+	if (mCurrentState == GameState::IN_GAME)
 	{
 		switch (key)
 		{
@@ -288,7 +282,9 @@ void Asteroids::CreateGUI()
 
 void Asteroids::CreateMenu()
 {
-	mLabels.clear();
+	DeleteMenu();
+
+	mCurrentState = GameState::MENU;
 
 	// Title and menu items with their colors
 	const std::vector<std::pair<std::string, GLVector3f>> menuItems = {
@@ -354,6 +350,42 @@ void Asteroids::CreateInstructions()
 	}
 
 	// Force immediate redraw
+	glutPostRedisplay();
+}
+
+void Asteroids::CreateHighScore()
+{
+	mCurrentState = GameState::HIGH_SCORES;
+	highScores.Load("HighScore.txt");
+
+	DeleteMenu();
+
+	// Helper function to add labels
+	auto AddLabel = [this](const std::string& text, float y, const GLVector3f& color) {
+		auto label = std::make_shared<GUILabel>(text);
+		label->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+		label->SetColor(color);
+		mGameDisplay->GetContainer()->AddComponent(
+			std::static_pointer_cast<GUIComponent>(label),
+			GLVector2f(0.5f, y));
+		mLabels.push_back(label);
+		};
+
+	// Add title and scores
+	AddLabel("HIGH SCORES", 0.9f, GLVector3f(1, 1, 0));
+
+	float yPos = 0.7f;
+	const auto& scores = highScores.GetScores();
+	for (size_t i = 0; i < 5; i++) {
+		std::string text = std::to_string(i + 1) + ". ";
+		if (i < scores.size()) {
+			text += scores[i].first + " " + std::to_string(scores[i].second);
+		}
+		AddLabel(text, yPos, GLVector3f(1, 1, 1));
+		yPos -= 0.1f;
+	}
+
+	AddLabel("Press 'M' to return", 0.2f, GLVector3f(0, 1, 0));
 	glutPostRedisplay();
 }
 
