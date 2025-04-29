@@ -29,5 +29,14 @@ bool Asteroid::CollisionTest(shared_ptr<GameObject> o)
 
 void Asteroid::OnCollision(const GameObjectList& objects)
 {
-	mWorld->FlagForRemoval(GetThisPtr());
+	for (auto obj : objects) {
+		// Only destroy asteroid if colliding with a bullet or a black hole
+		//|| obj->GetType() == GameObjectType("BlackHole")
+		if (obj->GetType() == GameObjectType("Bullet")) {
+			if (auto world = GetWorld()) {
+				world->FlagForRemoval(GetThisPtr());
+			}
+			break;  // Exit after handling
+		}
+	}
 }

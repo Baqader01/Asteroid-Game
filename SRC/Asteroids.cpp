@@ -191,6 +191,14 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 			SetTimer(500, START_NEXT_LEVEL); 
 		}
 	}
+	else if (object->GetType() == GameObjectType("ExtraLives")) {
+		if (mLivesLabel) {  // Check label exists
+			mPlayer.IncreaseLives();
+			mLivesLabel->SetText("Lives: " + std::to_string(mPlayer.GetLives()));
+		}
+		return;
+	}
+
 }
 
 // PUBLIC INSTANCE METHODS IMPLEMENTING ITimerListener ////////////////////////
@@ -261,7 +269,7 @@ void Asteroids::CreateExtraLives(int count) {
 
 	for (int i = 0; i < count; i++) {
 		auto extraLife = make_shared<ExtraLives>();
-		extraLife->SetBoundingShape(make_shared<BoundingSphere>(extraLife->GetThisPtr(), 1)); // Smaller bounding sphere
+		extraLife->SetBoundingShape(make_shared<BoundingSphere>(extraLife->GetThisPtr(), 2)); // Smaller bounding sphere
 		auto sprite = make_shared<Sprite>(anim->GetWidth(), anim->GetHeight(), anim);
 		extraLife->SetSprite(sprite);
 		extraLife->SetScale(0.1f);  // Add scaling
@@ -424,8 +432,13 @@ void Asteroids::DeleteLabels()
 		}
 	}
 	mLabels.clear();
-	// Then clear the vector
 
+	// Reset all label pointers
+	mScoreLabel.reset();
+	mLivesLabel.reset();
+	mGameOverLabel.reset();
+
+	// Then clear the vector
 	glutPostRedisplay();
 }
 

@@ -94,13 +94,24 @@ void Spaceship::Shoot(void)
 
 bool Spaceship::CollisionTest(shared_ptr<GameObject> o)
 {
-	if (o->GetType() != GameObjectType("Asteroid")) return false;
-	if (mBoundingShape.get() == NULL) return false;
-	if (o->GetBoundingShape().get() == NULL) return false;
+	// Allow collisions with Asteroids and ExtraLives
+	// && o->GetType() != GameObjectType("BlackHoleCoin")
+	if (o->GetType() != GameObjectType("Asteroid") &&
+		o->GetType() != GameObjectType("ExtraLives")) {
+		return false;
+	}
+
+	if (!mBoundingShape || !o->GetBoundingShape()) return false;
 	return mBoundingShape->CollisionTest(o->GetBoundingShape());
 }
 
-void Spaceship::OnCollision(const GameObjectList &objects)
+void Spaceship::OnCollision(const GameObjectList& objects)
 {
-	mWorld->FlagForRemoval(GetThisPtr());
+	for (auto obj : objects) {
+		if (obj->GetType() == GameObjectType("Asteroid")) {
+			// Only destroy ship when hitting asteroids
+			mWorld->FlagForRemoval(GetThisPtr());
+			break;
+		}
+	}
 }

@@ -40,6 +40,16 @@ public:
 		}
 	}
 
+	void IncreaseLives()
+	{
+		mLives++;
+	}
+
+	int GetLives() {
+		return mLives;
+	}
+
+
 private:
 	int mLives;
 
