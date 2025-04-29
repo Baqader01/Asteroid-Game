@@ -14,6 +14,7 @@
 #include "ExtraLives.h"
 #include "BlackHoleCoin.h"
 #include "BlackHole.h"
+#include "WeaponPowerup.h"
 
 // PUBLIC INSTANCE CONSTRUCTORS ///////////////////////////////////////////////
 
@@ -62,7 +63,7 @@ void Asteroids::Start()
 	AnimationManager::GetInstance().CreateAnimationFromFile("spaceship", 128, 128, 128, 128, "spaceship_fs.png");
 
 	https://wenrexa.itch.io/laser2020
-	AnimationManager::GetInstance().CreateAnimationFromFile("WeaponPowerUp", 122, 119, 128, 128, "PowerupBullet.png");
+	AnimationManager::GetInstance().CreateAnimationFromFile("bullet", 122, 119, 122, 119, "PowerupBullet.png");
 
 	//Hansjörg Malthaner : http://opengameart.org/users/varkalandar
 	AnimationManager::GetInstance().CreateAnimationFromFile("wormhole", 128, 96, 128, 96, "Wormhole.png");
@@ -94,7 +95,7 @@ void Asteroids::StartGame()
 	// Only create power-ups if they're enabled
 	if (mEnableExtraLives) CreateExtraLives(2);
 	if (mEnableBlackHoles) CreateBlackHole(2);
-
+	CreateWeaponPowerup(4);
 
 	//Create the GUI
 	CreateGUI();
@@ -249,7 +250,6 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 
 		// Create an active black hole 
 		auto newBlackHole = make_shared<BlackHole>();
-		newBlackHole->SetPosition(coin->GetRandomPosition());
 		newBlackHole->SetScale(0.2);
 		newBlackHole->SetBoundingShape(make_shared<BoundingSphere>(newBlackHole->GetThisPtr(), 20)); // Initialize bounding shape
 
@@ -261,7 +261,13 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 
 		mGameWorld->AddObject(newBlackHole);
 	}
-
+	else if (object->GetType() == GameObjectType("WeaponPowerup"))
+	{
+		// Activate powerup on spaceship if it exists
+		if (mSpaceship) {
+			mSpaceship->ActivateMissilePowerup();
+		}
+	}
 }
 
 // PUBLIC INSTANCE METHODS IMPLEMENTING ITimerListener ////////////////////////
@@ -360,6 +366,21 @@ void Asteroids::CreateBlackHole(int count)
 		coin->SetScale(0.2f); // Smaller scale for the coin
 
 		mGameWorld->AddObject(coin);
+	}
+}
+
+void Asteroids::CreateWeaponPowerup(int count)
+{
+	Animation* anim = AnimationManager::GetInstance().GetAnimationByName("bullet");
+	if (!anim) return;
+
+	for (int i = 0; i < count; i++) {
+		auto powerUp = make_shared<WeaponPowerup>();
+		powerUp->SetBoundingShape(make_shared<BoundingSphere>(powerUp->GetThisPtr(), 2.0f));
+		auto sprite = make_shared<Sprite>(anim->GetWidth(), anim->GetHeight(), anim);
+		powerUp->SetSprite(sprite);
+		powerUp->SetScale(0.1f);
+		mGameWorld->AddObject(powerUp);
 	}
 }
 

@@ -38,6 +38,14 @@ void Spaceship::Update(int t)
 {
 	// Call parent update function
 	GameObject::Update(t);
+
+	// Update powerup timer
+	if (mHasMissilePowerup) {
+		mPowerupTimer -= t;
+		if (mPowerupTimer <= 0) {
+			mHasMissilePowerup = false;
+		}
+	}
 }
 
 /** Render this spaceship. */
@@ -73,30 +81,78 @@ void Spaceship::Shoot(void)
 {
 	// Check the world exists
 	if (!mWorld) return;
-	// Construct a unit length vector in the direction the spaceship is headed
-	GLVector3f spaceship_heading(cos(DEG2RAD*mAngle), sin(DEG2RAD*mAngle), 0);
-	spaceship_heading.normalize();
-	// Calculate the point at the node of the spaceship from position and heading
-	GLVector3f bullet_position = mPosition + (spaceship_heading * 4);
-	// Calculate how fast the bullet should travel
-	float bullet_speed = 30;
-	// Construct a vector for the bullet's velocity
-	GLVector3f bullet_velocity = mVelocity + spaceship_heading * bullet_speed;
-	// Construct a new bullet
-	shared_ptr<GameObject> bullet
-		(new Bullet(bullet_position, bullet_velocity, mAcceleration, mAngle, 0, 2000));
-	bullet->SetBoundingShape(make_shared<BoundingSphere>(bullet->GetThisPtr(), 2.0f));
-	bullet->SetShape(mBulletShape);
-	// Add the new bullet to the game world
-	mWorld->AddObject(bullet);
 
+	if (mHasMissilePowerup) {
+		// Create seeking missile
+		// 
+		// Calculate forward direction
+		GLVector3f direction(cos(DEG2RAD * mAngle), sin(DEG2RAD * mAngle), 0);
+		direction.normalize();
+
+		// Create missile slightly ahead of ship
+		GLVector3f missile_pos = mPosition + (direction * 4);
+		GLVector3f missile_vel = mVelocity + direction * 30.0f;
+
+		// Find nearest asteroid
+		shared_ptr<GameObject> target;
+		float closest_dist = FLT_MAX;
+		for (auto obj : mWorld->GetGameObjects()) {
+			if (obj->GetType() == GameObjectType("Asteroid")) {
+				float dist = (obj->GetPosition() - mPosition).length();
+				if (dist < closest_dist) {
+					closest_dist = dist;
+					target = obj;
+				}
+			}
+		}
+
+		// Add seeking behavior if target found
+		if (target) {
+			GLVector3f to_target = target->GetPosition() - missile_pos;
+			float distance = to_target.length();
+
+			// Only normalize if not zero vector
+			if (distance > 0) {
+				to_target /= distance;  // Manual normalization
+				missile_vel += to_target * 60.0f; // Add seeking force
+			}
+		}
+
+		// Create missile
+		shared_ptr<GameObject> missile(new Bullet(missile_pos, missile_vel,
+			mAcceleration, mAngle, 0, 2000));
+		missile->SetBoundingShape(make_shared<BoundingSphere>(missile->GetThisPtr(), 2.0f));
+		missile->SetShape(mBulletShape);
+		mWorld->AddObject(missile);
+
+	}
+	else {
+		// Normal bullet
+
+		// Calculate bullet direction 
+		GLVector3f bullet_direction(cos(DEG2RAD * mAngle), sin(DEG2RAD * mAngle), 0);
+		bullet_direction.normalize();
+
+		// Calculate bullet position and velocity
+		GLVector3f bullet_position = mPosition + (bullet_direction * 4);
+		GLVector3f bullet_velocity = mVelocity + bullet_direction * 30.0f;
+
+		// Create bullet
+		shared_ptr<GameObject> bullet(new Bullet(bullet_position, bullet_velocity,
+			mAcceleration, mAngle, 0, 2000));
+		bullet->SetBoundingShape(make_shared<BoundingSphere>(bullet->GetThisPtr(), 2.0f));
+		bullet->SetShape(mBulletShape);
+		mWorld->AddObject(bullet);
+	}
 }
+
 
 bool Spaceship::CollisionTest(shared_ptr<GameObject> o)
 {
 	// Allow collisions with Asteroids and ExtraLives
 	if (o->GetType() != GameObjectType("Asteroid") &&
 		o->GetType() != GameObjectType("ExtraLives") && 
+		o->GetType() != GameObjectType("WeaponPowerup") &&
 		o->GetType() != GameObjectType("BlackHoleCoin")) 
 	{
 		return false;

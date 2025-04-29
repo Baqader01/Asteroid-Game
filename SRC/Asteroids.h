@@ -99,9 +99,15 @@ private:
 
 	void DeleteLabels();
 
+	//powerups
 	void CreateAsteroids(const uint num_asteroids);
 	void CreateExtraLives(int count);
 	void CreateBlackHole(int count);
+
+	// Weapon upgrade
+	bool mHasHeatSeeking = false;
+	void ActivateHeatSeeking();
+	void CreateWeaponPowerup(int count);
 
 	shared_ptr<GameObject> CreateExplosion();
 	
