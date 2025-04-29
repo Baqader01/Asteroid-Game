@@ -95,9 +95,10 @@ void Spaceship::Shoot(void)
 bool Spaceship::CollisionTest(shared_ptr<GameObject> o)
 {
 	// Allow collisions with Asteroids and ExtraLives
-	// && o->GetType() != GameObjectType("BlackHoleCoin")
 	if (o->GetType() != GameObjectType("Asteroid") &&
-		o->GetType() != GameObjectType("ExtraLives")) {
+		o->GetType() != GameObjectType("ExtraLives") && 
+		o->GetType() != GameObjectType("BlackHoleCoin")) 
+	{
 		return false;
 	}
 

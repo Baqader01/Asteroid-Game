@@ -31,8 +31,7 @@ void Asteroid::OnCollision(const GameObjectList& objects)
 {
 	for (auto obj : objects) {
 		// Only destroy asteroid if colliding with a bullet or a black hole
-		//|| obj->GetType() == GameObjectType("BlackHole")
-		if (obj->GetType() == GameObjectType("Bullet")) {
+		if (obj->GetType() == GameObjectType("Bullet") || obj->GetType() == GameObjectType("BlackHole")) {
 			if (auto world = GetWorld()) {
 				world->FlagForRemoval(GetThisPtr());
 			}

@@ -84,6 +84,7 @@ private:
 
 	void CreateAsteroids(const uint num_asteroids);
 	void CreateExtraLives(int count);
+	void CreateBlackHole(int count);
 	shared_ptr<GameObject> CreateExplosion();
 	
 	const static uint SHOW_GAME_OVER = 0;

@@ -1,12 +1,6 @@
 ﻿cl : command line  warning D9035: option 'Gm' has been deprecated and will be removed in a future release
-  Spaceship.cpp
   Asteroids.cpp
-C:\Users\smbaq\Documents\GitHub\Asteroid-Game\src\Asteroids.cpp(62,2): warning C4102: 'https': unreferenced label
-  Asteroid.cpp
-  Generating Code...
-  Skipping... (no relevant changes detected)
-  main.cpp
-  ExtraLives.cpp
+C:\Users\smbaq\Documents\GitHub\Asteroid-Game\src\Asteroids.cpp(64,2): warning C4102: 'https': unreferenced label
 Asteroid.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/SAFESEH' specification
   Asteroids.vcxproj -> C:\Users\smbaq\Documents\GitHub\Asteroid-Game\bin\Asteroids.exe
   ..\..\assets\asteroid.shape

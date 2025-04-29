@@ -12,6 +12,8 @@
 #include "GUILabel.h"
 #include "Explosion.h"
 #include "ExtraLives.h"
+#include "BlackHoleCoin.h"
+#include "BlackHole.h"
 
 // PUBLIC INSTANCE CONSTRUCTORS ///////////////////////////////////////////////
 
@@ -74,6 +76,7 @@ void Asteroids::Start()
 	// Create some asteroids and add them to the world
 	CreateAsteroids(10);
 	CreateExtraLives(2);
+	CreateBlackHole(2);
 
 	// Add a player (watcher) to the game world
 	mGameWorld->AddListener(&mPlayer);
@@ -198,6 +201,24 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 		}
 		return;
 	}
+	else if (object->GetType() == GameObjectType("BlackHoleCoin")) {
+		// When a BlackHoleCoin is collected 
+		auto coin = dynamic_pointer_cast<BlackHoleCoin>(object);
+
+		// Create an active black hole 
+		auto newBlackHole = make_shared<BlackHole>();
+		newBlackHole->SetPosition(coin->GetRandomPosition());
+		newBlackHole->SetScale(0.2);
+		newBlackHole->SetBoundingShape(make_shared<BoundingSphere>(newBlackHole->GetThisPtr(), 20)); // Initialize bounding shape
+
+		// Set visual properties
+		Animation* anim = AnimationManager::GetInstance().GetAnimationByName("wormhole");
+		if (anim) {
+			newBlackHole->SetSprite(make_shared<Sprite>(anim->GetWidth(), anim->GetHeight(), anim));
+		}
+
+		mGameWorld->AddObject(newBlackHole);
+	}
 
 }
 
@@ -216,6 +237,8 @@ void Asteroids::OnTimer(int value)
 		mLevel++;
 		int num_asteroids = 10 + 2 * mLevel;
 		CreateAsteroids(num_asteroids);
+		CreateExtraLives(2);
+		CreateBlackHole(2);
 	}
 
 	if (value == SHOW_GAME_OVER)
@@ -275,6 +298,24 @@ void Asteroids::CreateExtraLives(int count) {
 		extraLife->SetScale(0.1f);  // Add scaling
 
 		mGameWorld->AddObject(extraLife);
+	}
+}
+
+void Asteroids::CreateBlackHole(int count)
+{
+	Animation* anim = AnimationManager::GetInstance().GetAnimationByName("wormhole");
+	if (!anim) return;
+
+	for (int i = 0; i < count; i++) {
+		auto coin = make_shared<BlackHoleCoin>();
+
+		// Make it smaller than the actual black hole
+		coin->SetBoundingShape(make_shared<BoundingSphere>(coin->GetThisPtr(), 2));
+		auto sprite = make_shared<Sprite>(anim->GetWidth() / 2, anim->GetHeight() / 2, anim);
+		coin->SetSprite(sprite);
+		coin->SetScale(0.2f); // Smaller scale for the coin
+
+		mGameWorld->AddObject(coin);
 	}
 }
 
