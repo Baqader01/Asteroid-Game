@@ -83,6 +83,7 @@ private:
 	void DeleteLabels();
 
 	void CreateAsteroids(const uint num_asteroids);
+	void CreateExtraLives(int count);
 	shared_ptr<GameObject> CreateExplosion();
 	
 	const static uint SHOW_GAME_OVER = 0;

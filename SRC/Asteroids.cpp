@@ -11,8 +11,7 @@
 #include "BoundingSphere.h"
 #include "GUILabel.h"
 #include "Explosion.h"
-
-#include <Windows.h>
+#include "ExtraLives.h"
 
 // PUBLIC INSTANCE CONSTRUCTORS ///////////////////////////////////////////////
 
@@ -56,15 +55,25 @@ void Asteroids::Start()
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse_light);
 	glEnable(GL_LIGHT0);
 
-	Animation *explosion_anim = AnimationManager::GetInstance().CreateAnimationFromFile("explosion", 64, 1024, 64, 64, "explosion_fs.png");
-	Animation *asteroid1_anim = AnimationManager::GetInstance().CreateAnimationFromFile("asteroid1", 128, 8192, 128, 128, "asteroid1_fs.png");
-	Animation *spaceship_anim = AnimationManager::GetInstance().CreateAnimationFromFile("spaceship", 128, 128, 128, 128, "spaceship_fs.png");
+	AnimationManager::GetInstance().CreateAnimationFromFile("explosion", 64, 1024, 64, 64, "explosion_fs.png");
+	AnimationManager::GetInstance().CreateAnimationFromFile("asteroid1", 128, 8192, 128, 128, "asteroid1_fs.png");
+	AnimationManager::GetInstance().CreateAnimationFromFile("spaceship", 128, 128, 128, 128, "spaceship_fs.png");
+
+	https://wenrexa.itch.io/laser2020
+	AnimationManager::GetInstance().CreateAnimationFromFile("WeaponPowerUp", 122, 119, 128, 128, "PowerupBullet.png");
+
+	//Hansjörg Malthaner : http://opengameart.org/users/varkalandar
+	AnimationManager::GetInstance().CreateAnimationFromFile("wormhole", 128, 96, 128, 96, "Wormhole.png");
+
+	// game asset from itch io by goblin mode games: https://goblin-mode-games.itch.io/pixel-art-heart-capsules
+	AnimationManager::GetInstance().CreateAnimationFromFile("heart", 80, 80, 80, 80, "Hearts.png");
 
 	//creating the menu
 	CreateMenu();
 
 	// Create some asteroids and add them to the world
 	CreateAsteroids(10);
+	CreateExtraLives(2);
 
 	// Add a player (watcher) to the game world
 	mGameWorld->AddListener(&mPlayer);
@@ -243,6 +252,21 @@ void Asteroids::CreateAsteroids(const uint num_asteroids)
 		asteroid->SetSprite(asteroid_sprite);
 		asteroid->SetScale(0.2f);
 		mGameWorld->AddObject(asteroid);
+	}
+}
+
+void Asteroids::CreateExtraLives(int count) {
+	Animation* anim = AnimationManager::GetInstance().GetAnimationByName("heart");
+	if (!anim) return;
+
+	for (int i = 0; i < count; i++) {
+		auto extraLife = make_shared<ExtraLives>();
+		extraLife->SetBoundingShape(make_shared<BoundingSphere>(extraLife->GetThisPtr(), 1)); // Smaller bounding sphere
+		auto sprite = make_shared<Sprite>(anim->GetWidth(), anim->GetHeight(), anim);
+		extraLife->SetSprite(sprite);
+		extraLife->SetScale(0.1f);  // Add scaling
+
+		mGameWorld->AddObject(extraLife);
 	}
 }
 
