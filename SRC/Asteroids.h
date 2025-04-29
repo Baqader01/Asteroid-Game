@@ -9,6 +9,7 @@
 #include "ScoreKeeper.h"
 #include "Player.h"
 #include "IPlayerListener.h"
+#include <vector>
 
 class GameObject;
 class Spaceship;
@@ -21,6 +22,7 @@ public:
 	virtual ~Asteroids(void);
 
 	virtual void Start(void);
+	void StartGame();
 	virtual void Stop(void);
 
 	// Declaration of IKeyboardListener interface ////////////////////////////////
@@ -53,12 +55,16 @@ private:
 	shared_ptr<GUILabel> mLivesLabel;
 	shared_ptr<GUILabel> mGameOverLabel;
 
+	vector<shared_ptr<GUILabel>> mMenuLabels;
+
 	uint mLevel;
 	uint mAsteroidCount;
 
 	void ResetSpaceship();
 	shared_ptr<GameObject> CreateSpaceship();
 	void CreateGUI();
+	void CreateMenu();
+
 	void CreateAsteroids(const uint num_asteroids);
 	shared_ptr<GameObject> CreateExplosion();
 	

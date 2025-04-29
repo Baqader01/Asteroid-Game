@@ -58,13 +58,13 @@ void Asteroids::Start()
 	Animation *asteroid1_anim = AnimationManager::GetInstance().CreateAnimationFromFile("asteroid1", 128, 8192, 128, 128, "asteroid1_fs.png");
 	Animation *spaceship_anim = AnimationManager::GetInstance().CreateAnimationFromFile("spaceship", 128, 128, 128, 128, "spaceship_fs.png");
 
-	// Create a spaceship and add it to the world
-	mGameWorld->AddObject(CreateSpaceship());
+	//creating the menu
+	CreateMenu();
+
 	// Create some asteroids and add them to the world
 	CreateAsteroids(10);
 
-	//Create the GUI
-	CreateGUI();
+	CreateMenu();
 
 	// Add a player (watcher) to the game world
 	mGameWorld->AddListener(&mPlayer);
@@ -74,6 +74,15 @@ void Asteroids::Start()
 
 	// Start the game
 	GameSession::Start();
+}
+
+void Asteroids::StartGame() 
+{
+	//Create the GUI
+	CreateGUI();
+
+	// Create a spaceship and add it to the world
+	mGameWorld->AddObject(CreateSpaceship());
 }
 
 /** Stop the current game. */
@@ -244,6 +253,36 @@ void Asteroids::CreateGUI()
 		= static_pointer_cast<GUIComponent>(mGameOverLabel);
 	mGameDisplay->GetContainer()->AddComponent(game_over_component, GLVector2f(0.5f, 0.5f));
 
+}
+
+void Asteroids::CreateMenu()
+{
+	mMenuLabels.clear();
+
+	// Title and menu items with their colors
+	const std::vector<std::pair<std::string, GLVector3f>> menuItems = {
+		{"ASTEROIDS", GLVector3f(0, 1, 0)},  // Green title
+		{"Press 'P' to start the game", GLVector3f(1, 1, 1)},
+		{"Press 'D' to change the difficulty", GLVector3f(1, 1, 1)},
+		{"Press 'H' to look at the high scores", GLVector3f(1, 1, 1)},
+		{"Press 'I' to look at the instructions", GLVector3f(1, 1, 1)},
+		{"Press 'M' to go back to the menu", GLVector3f(1, 1, 1)}
+	};
+
+	float yPos = 0.8f;  // Start position for title at top
+	const float spacing = 0.15f;
+
+	for (const auto& item : menuItems) {
+		auto label = std::make_shared<GUILabel>(item.first);
+		label->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+		label->SetColor(item.second);
+
+		mGameDisplay->GetContainer()->RemoveComponent(label);
+		mGameDisplay->GetContainer()->AddComponent(label, GLVector2f(0.5f, yPos));
+
+		mMenuLabels.push_back(label);
+		yPos -= spacing;  // Move down for next item
+	}
 }
 
 void Asteroids::OnScoreChanged(int score)
