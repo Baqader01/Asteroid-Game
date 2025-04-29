@@ -80,7 +80,7 @@ void Asteroids::StartGame()
 {
 	mCurrentState = GameState::IN_GAME;
 
-	DeleteMenu();
+	DeleteLabels();
 
 	//Create the GUI
 	CreateGUI();
@@ -102,21 +102,6 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 {
 	const char lowerKey = tolower(key);
 
-	switch (lowerKey) {
-	case 'm':
-		CreateMenu();
-		return;
-	case 'p':
-		StartGame();
-
-		return;
-	case 'i':
-		CreateInstructions();
-		return;
-	case 'h':
-		CreateHighScore();
-		return;
-	}
 
 	if (mCurrentState == GameState::IN_GAME)
 	{
@@ -127,6 +112,23 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 			break;
 		default:
 			break;
+		}
+	}
+	else
+	{
+		switch (lowerKey) {
+		case 'm':
+			CreateMenu();
+			return;
+		case 'p':
+			StartGame();
+			return;
+		case 'i':
+			CreateInstructions();
+			return;
+		case 'h':
+			CreateHighScore();
+			return;
 		}
 	}
 }
@@ -246,43 +248,39 @@ void Asteroids::CreateAsteroids(const uint num_asteroids)
 
 void Asteroids::CreateGUI()
 {
+	// Clear any existing GUI labels first
+	DeleteLabels();
+
 	// Add a (transparent) border around the edge of the game display
 	mGameDisplay->GetContainer()->SetBorder(GLVector2i(10, 10));
-	// Create a new GUILabel and wrap it up in a shared_ptr
-	mScoreLabel = make_shared<GUILabel>("Score: 0");
-	// Set the vertical alignment of the label to GUI_VALIGN_TOP
-	mScoreLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_TOP);
-	// Add the GUILabel to the GUIComponent  
-	shared_ptr<GUIComponent> score_component
-		= static_pointer_cast<GUIComponent>(mScoreLabel);
-	mGameDisplay->GetContainer()->AddComponent(score_component, GLVector2f(0.0f, 1.0f));
 
-	// Create a new GUILabel and wrap it up in a shared_ptr
+	// Create and add score label (top-left)
+	mScoreLabel = make_shared<GUILabel>("Score: 0");
+	mScoreLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_TOP);
+	shared_ptr<GUIComponent> score_component = static_pointer_cast<GUIComponent>(mScoreLabel);
+	mGameDisplay->GetContainer()->AddComponent(score_component, GLVector2f(0.0f, 1.0f));
+	mLabels.push_back(mScoreLabel);  // Add to unified label container
+
+	// Create and add lives label (bottom-left)
 	mLivesLabel = make_shared<GUILabel>("Lives: 3");
-	// Set the vertical alignment of the label to GUI_VALIGN_BOTTOM
 	mLivesLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_BOTTOM);
-	// Add the GUILabel to the GUIComponent  
 	shared_ptr<GUIComponent> lives_component = static_pointer_cast<GUIComponent>(mLivesLabel);
 	mGameDisplay->GetContainer()->AddComponent(lives_component, GLVector2f(0.0f, 0.0f));
+	mLabels.push_back(mLivesLabel);  // Add to unified label container
 
-	// Create a new GUILabel and wrap it up in a shared_ptr
-	mGameOverLabel = shared_ptr<GUILabel>(new GUILabel("GAME OVER"));
-	// Set the horizontal alignment of the label to GUI_HALIGN_CENTER
+	// Create and add game over label (centered, initially hidden)
+	mGameOverLabel = make_shared<GUILabel>("GAME OVER");
 	mGameOverLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
-	// Set the vertical alignment of the label to GUI_VALIGN_MIDDLE
 	mGameOverLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_MIDDLE);
-	// Set the visibility of the label to false (hidden)
 	mGameOverLabel->SetVisible(false);
-	// Add the GUILabel to the GUIContainer  
-	shared_ptr<GUIComponent> game_over_component
-		= static_pointer_cast<GUIComponent>(mGameOverLabel);
+	shared_ptr<GUIComponent> game_over_component = static_pointer_cast<GUIComponent>(mGameOverLabel);
 	mGameDisplay->GetContainer()->AddComponent(game_over_component, GLVector2f(0.5f, 0.5f));
-
+	mLabels.push_back(mGameOverLabel);  // Add to unified label container
 }
 
 void Asteroids::CreateMenu()
 {
-	DeleteMenu();
+	DeleteLabels();
 
 	mCurrentState = GameState::MENU;
 
@@ -317,7 +315,7 @@ void Asteroids::CreateMenu()
 void Asteroids::CreateInstructions()
 {
 	// Clear any existing menu or game state
-	DeleteMenu();
+	DeleteLabels();
 	mCurrentState = GameState::INSTRUCTIONS;
 
 	// Instruction text lines
@@ -358,7 +356,7 @@ void Asteroids::CreateHighScore()
 	mCurrentState = GameState::HIGH_SCORES;
 	highScores.Load("HighScore.txt");
 
-	DeleteMenu();
+	DeleteLabels();
 
 	// Helper function to add labels
 	auto AddLabel = [this](const std::string& text, float y, const GLVector3f& color) {
@@ -389,7 +387,7 @@ void Asteroids::CreateHighScore()
 	glutPostRedisplay();
 }
 
-void Asteroids::DeleteMenu()
+void Asteroids::DeleteLabels()
 {
 	auto container = mGameDisplay->GetContainer();
 

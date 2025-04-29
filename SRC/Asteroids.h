@@ -80,7 +80,7 @@ private:
 	void CreateInstructions();
 	void CreateHighScore();
 
-	void DeleteMenu();
+	void DeleteLabels();
 
 	void CreateAsteroids(const uint num_asteroids);
 	shared_ptr<GameObject> CreateExplosion();
