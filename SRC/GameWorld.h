@@ -51,8 +51,7 @@ public:
 
 	int GetObjectCount();
 
-	GameObjectList GetObjects() {return mGameObjects;
-	}
+	GameObjectList GetGameObjects() {return mGameObjects;}
 	
 protected:
 	void UpdateObjects(int t);

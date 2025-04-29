@@ -1,22 +1,13 @@
-#ifndef BULLET_POWERUP_H
-#define BULLET_POWERUP_H
-
+#pragma once
 #include "GameObject.h"
-#include "Animation.h"
-#include "BoundingSphere.h"
 
-class WeaponPowerUp : public GameObject
+class WeaponPowerup : public GameObject
 {
 public:
-    WeaponPowerUp();
-    virtual ~WeaponPowerUp(void);
+    WeaponPowerup();
+    virtual ~WeaponPowerup() = default;
 
-    virtual void Update(int t);
-    virtual void Render(void);
-    virtual bool CollisionTest(shared_ptr<GameObject> o);
-    virtual void OnCollision(const GameObjectList& objects);
+    void Update(int t) override;
+    bool CollisionTest(shared_ptr<GameObject> o) override;
+    void OnCollision(const GameObjectList& objects) override;
 };
-
-#endif
-
-

@@ -1,59 +1,32 @@
-#include "WeaponPowerUp.h"
+#include "WeaponPowerup.h"
 #include "Spaceship.h"
 #include "GameWorld.h"
-#include "AnimationManager.h"
 
-WeaponPowerUp::WeaponPowerUp()
-    : GameObject("WeaponPowerUp")
+WeaponPowerup::WeaponPowerup() : GameObject("WeaponPowerup")
 {
-    // Initialize movement properties 
-    mAngle = rand() % 360;
-    mRotation = 0;
-
-    // Set random position 
-    mPosition.x = rand() / 2;
-    mPosition.y = rand() / 2;
-    mPosition.z = 0.0;
-
-    // Set velocity 
-    mVelocity.x = 10 * cos(DEG2RAD * mAngle);
-    mVelocity.y = 10 * sin(DEG2RAD * mAngle);
-    mVelocity.z = 0.0;
-
-    // Set up visual appearance
-    Animation* anim = AnimationManager::GetInstance().GetAnimationByName("WeaponPowerUp");
-    if (anim) {
-        SetSprite(make_shared<Sprite>(anim->GetWidth(), anim->GetHeight(), anim));
-        SetScale(0.1f);
-        SetBoundingShape(make_shared<BoundingSphere>(GetThisPtr(), 1.0f));
-    }
+    // Basic movement 
+    mAngle = static_cast<float>(rand() % 360);
+    mPosition = GLVector3f(rand() % 100 - 50, rand() % 100 - 50, 0);
+    mVelocity = GLVector3f(2.0f * cos(DEG2RAD * mAngle),
+        2.0f * sin(DEG2RAD * mAngle),
+        0.0f);
 }
 
-WeaponPowerUp::~WeaponPowerUp(void) {}
-
-void WeaponPowerUp::Update(int t)
+void WeaponPowerup::Update(int t)
 {
     GameObject::Update(t);
-    // Add any special update behavior here
+    // Gentle floating motion
+    mVelocity.x = 2.0f * cos(DEG2RAD * (mAngle + t / 100.0f));
+    mVelocity.y = 2.0f * sin(DEG2RAD * (mAngle + t / 100.0f));
 }
 
-void WeaponPowerUp::Render(void)
+bool WeaponPowerup::CollisionTest(shared_ptr<GameObject> o)
 {
-    if (mSprite.get()) {
-        mSprite->Render();
-    }
-    GameObject::Render();
+    return o->GetType() == GameObjectType("Spaceship") &&
+        GameObject::CollisionTest(o);
 }
 
-bool WeaponPowerUp::CollisionTest(shared_ptr<GameObject> o)
-{
-    if (o->GetType() == GameObjectType("Spaceship")) {
-        return GameObject::CollisionTest(o);
-    }
-    return false;
-}
-
-void WeaponPowerUp::OnCollision(const GameObjectList& objects)
+void WeaponPowerup::OnCollision(const GameObjectList& objects)
 {
     for (auto obj : objects) {
         if (obj->GetType() == GameObjectType("Spaceship")) {

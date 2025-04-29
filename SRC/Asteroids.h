@@ -30,6 +30,7 @@ public:
 		MENU,
 		IN_GAME,
 		INSTRUCTIONS,
+		DIFFICULTY,
 		HIGH_SCORES,
 		GAME_OVER
 	};
@@ -80,6 +81,11 @@ private:
 	void CreateInstructions();
 	void CreateHighScore();
 	void CreateGameOver();
+	void CreateDifficulty();
+
+	// Difficulty (default all enabled)
+	bool mEnableExtraLives = true;
+	bool mEnableBlackHoles = true;
 
 	void AddHighScore(const std::string& name, int score);
 
@@ -93,9 +99,16 @@ private:
 
 	void DeleteLabels();
 
+	//powerups
 	void CreateAsteroids(const uint num_asteroids);
 	void CreateExtraLives(int count);
 	void CreateBlackHole(int count);
+
+	// Weapon upgrade
+	bool mHasHeatSeeking = false;
+	void ActivateHeatSeeking();
+	void CreateWeaponPowerup(int count);
+
 	shared_ptr<GameObject> CreateExplosion();
 
 	const static uint SHOW_GAME_OVER = 0;

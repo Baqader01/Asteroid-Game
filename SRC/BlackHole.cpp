@@ -31,7 +31,7 @@ void BlackHole::Update(int t)
 
     // Apply gravity to nearby objects
     if (auto world = GetWorld()) {
-        for (auto obj : world->GetObjects()) {
+        for (auto obj : world->GetGameObjects()) {
             if (obj->GetType() == GameObjectType("Asteroid")) {
                 GLVector3f dir = mPosition - obj->GetPosition();
                 float distance = dir.length();

@@ -12,7 +12,6 @@ using namespace std;
 Spaceship::Spaceship()
 	: GameObject("Spaceship"), mThrust(0)
 {
-	mWeaponLevel = 1;
 }
 
 /** Construct a spaceship with given position, velocity, acceleration, angle, and rotation. */
@@ -59,8 +58,8 @@ void Spaceship::Thrust(float t)
 {
 	mThrust = t;
 	// Increase acceleration in the direction of ship
-	mAcceleration.x = mThrust*cos(DEG2RAD*mAngle);
-	mAcceleration.y = mThrust*sin(DEG2RAD*mAngle);
+	mAcceleration.x = mThrust * cos(DEG2RAD * mAngle);
+	mAcceleration.y = mThrust * sin(DEG2RAD * mAngle);
 }
 
 /** Set the rotation. */
@@ -75,44 +74,55 @@ void Spaceship::Shoot(void)
 	// Check the world exists
 	if (!mWorld) return;
 
-	// Weapon level 1 - single shot
-	if (mWeaponLevel == 1) {
-		FireSingleBullet(0); // Center shot
-	}
-	// Weapon level 2 - double shot
-	else if (mWeaponLevel == 2) {
-		FireSingleBullet(-10); // Left offset
-		FireSingleBullet(10);  // Right offset
-	}
-	// Weapon level 3 - triple shot
-	else if (mWeaponLevel >= 3) {
-		FireSingleBullet(0);   // Center
-		FireSingleBullet(-20); // Left
-		FireSingleBullet(20);  // Right
-	}
-}
+	// Calculate bullet direction (default to ship's heading)
+	GLVector3f bullet_direction(cos(DEG2RAD * mAngle), sin(DEG2RAD * mAngle), 0);
+	bullet_direction.normalize();
 
-void Spaceship::FireSingleBullet(float angleOffset)
-{
-	GLVector3f spaceship_heading(cos(DEG2RAD * (mAngle + angleOffset)),
-		sin(DEG2RAD * (mAngle + angleOffset)), 0);
-	spaceship_heading.normalize();
+	// Heat-seeking behavior
+	if (mHeatSeekingEnabled) {
+		if (auto asteroid = FindNearestAsteroid()) {
+			bullet_direction = asteroid->GetPosition() - mPosition;
+			bullet_direction.normalize();  // Normalize after assignment
+		}
+	}
 
-	GLVector3f bullet_position = mPosition + (spaceship_heading * 4);
-	GLVector3f bullet_velocity = mVelocity + spaceship_heading * 30; // 30 = bullet speed
+	// Calculate bullet position and velocity
+	GLVector3f bullet_position = mPosition + (bullet_direction * 4);
+	GLVector3f bullet_velocity = mVelocity + bullet_direction * 30.0f;
 
+	// Create bullet
 	shared_ptr<GameObject> bullet(new Bullet(bullet_position, bullet_velocity,
-		mAcceleration, mAngle + angleOffset, 0, 2000));
+		mAcceleration, mAngle, 0, 2000));
 	bullet->SetBoundingShape(make_shared<BoundingSphere>(bullet->GetThisPtr(), 2.0f));
 	bullet->SetShape(mBulletShape);
 	mWorld->AddObject(bullet);
 }
+
+shared_ptr<GameObject> Spaceship::FindNearestAsteroid() {
+	if (!mWorld) return nullptr;
+
+	shared_ptr<GameObject> nearest;
+	float minDist = FLT_MAX;
+
+	for (auto obj : mWorld->GetGameObjects()) {
+		if (obj->GetType() == GameObjectType("Asteroid")) {
+			float dist = (obj->GetPosition() - mPosition).length();
+			if (dist < minDist) {
+				minDist = dist;
+				nearest = obj;
+			}
+		}
+	}
+	return nearest;
+}
+
 bool Spaceship::CollisionTest(shared_ptr<GameObject> o)
 {
 	// Allow collisions with Asteroids and ExtraLives
 	if (o->GetType() != GameObjectType("Asteroid") &&
 		o->GetType() != GameObjectType("ExtraLives") &&
-		o->GetType() != GameObjectType("BlackHoleCoin"))  {
+		o->GetType() != GameObjectType("BlackHoleCoin"))
+	{
 		return false;
 	}
 
