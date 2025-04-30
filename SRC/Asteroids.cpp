@@ -95,7 +95,7 @@ void Asteroids::StartGame()
 	// Only create power-ups if they're enabled
 	if (mEnableExtraLives) CreateExtraLives(2);
 	if (mEnableBlackHoles) CreateBlackHole(2);
-	CreateWeaponPowerup(4);
+	if (mEnableWeaponPowerup) CreateWeaponPowerup(2);
 
 	//Create the GUI
 	CreateGUI();
@@ -130,7 +130,7 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 		}
 	}
 	else if (mCurrentState == GameState::DIFFICULTY) {
-		switch (tolower(key)) {
+		switch (lowerKey) {
 		case 'l':
 			mEnableExtraLives = !mEnableExtraLives;
 			CreateDifficulty(); // Refresh display
@@ -139,6 +139,39 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 			mEnableBlackHoles = !mEnableBlackHoles;
 			CreateDifficulty(); // Refresh display
 			break;
+		case 'w':
+			mEnableWeaponPowerup = !mEnableWeaponPowerup;
+			CreateDifficulty(); // Refresh display
+			break;
+		case 'm':
+			CreateMenu();
+			break;
+		}
+	}
+	else if (mCurrentState == GameState::GAME_OVER)
+	{
+		if (mWaitingForNameInput) {
+			if (!mNameInputLabel) return;
+
+			if (key == 13) { // Enter key
+				if (!mPlayerName.empty()) {
+					AddHighScore(mPlayerName, mScoreKeeper.GetScore());
+				}
+				CleanupNameInput();
+				CreateHighScore();
+			}
+			else if (key == 8 && !mPlayerName.empty()) { // Backspace
+				mPlayerName.pop_back();
+				mNameInputLabel->SetText(mPlayerName);
+			}
+			else if (isalpha(key) && mPlayerName.length() < 10) { // Letter input
+				mPlayerName += key;
+				mNameInputLabel->SetText(mPlayerName);
+			}
+			return;
+		}
+
+		switch (lowerKey) {
 		case 'm':
 			CreateMenu();
 			break;
@@ -147,44 +180,12 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 	else
 	{
 		switch (lowerKey) {
-		case 'm':
-			CreateMenu();
-			return;
-		case 'p':
-			StartGame();
-			return;
-		case 'd':
-			CreateDifficulty();
-			return;
-
-		case 'i':
-			CreateInstructions();
-			return;
-		case 'h':
-			CreateHighScore();
-			return;
+		case 'p': StartGame(); break;
+		case 'd': CreateDifficulty(); break;
+		case 'i': CreateInstructions(); break;
+		case 'h': CreateHighScore(); break;
+		case 'm': CreateMenu(); break;
 		}
-	}
-
-	if (mWaitingForNameInput) {
-		if (!mNameInputLabel) return;
-
-		if (key == 13) { // Enter key
-			if (!mPlayerName.empty()) {
-				AddHighScore(mPlayerName, mScoreKeeper.GetScore());
-			}
-			CleanupNameInput();
-			CreateHighScore();
-		}
-		else if (key == 8 && !mPlayerName.empty()) { // Backspace
-			mPlayerName.pop_back();
-			mNameInputLabel->SetText(mPlayerName);
-		}
-		else if (isalpha(key) && mPlayerName.length() < 10) { // Letter input
-			mPlayerName += key;
-			mNameInputLabel->SetText(mPlayerName);
-		}
-		return;
 	}
 }
 
@@ -289,6 +290,7 @@ void Asteroids::OnTimer(int value)
 		// Only create power-ups if they're enabled
 		if (mEnableExtraLives) CreateExtraLives(2);
 		if (mEnableBlackHoles) CreateBlackHole(2);
+		if (mEnableWeaponPowerup) CreateWeaponPowerup(2);
 	}
 
 	if (value == SHOW_GAME_OVER)
@@ -527,6 +529,8 @@ void Asteroids::CreateHighScore()
 
 void Asteroids::CreateGameOver()
 {
+	mCurrentState = GameState::GAME_OVER;
+
 	DeleteLabels();
 	mWaitingForNameInput = true;
 
@@ -580,6 +584,15 @@ void Asteroids::CreateDifficulty()
 	holesLabel->SetColor(GLVector3f(1, 1, 1));
 	mGameDisplay->GetContainer()->AddComponent(holesLabel, GLVector2f(0.5f, yPos));
 	mLabels.push_back(holesLabel);
+	yPos -= spacing;
+
+	// Weapon powerup Toggle
+	string weaponText = "Weapon power up: " + string(mEnableWeaponPowerup ? "ON (Press W)" : "OFF (Press W)");
+	auto weaponLabel = make_shared<GUILabel>(weaponText);
+	weaponLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+	weaponLabel->SetColor(GLVector3f(1, 1, 1));
+	mGameDisplay->GetContainer()->AddComponent(weaponLabel, GLVector2f(0.5f, yPos));
+	mLabels.push_back(weaponLabel);
 	yPos -= spacing;
 
 	// Back to menu

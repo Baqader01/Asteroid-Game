@@ -82,70 +82,53 @@ void Spaceship::Shoot(void)
 	// Check the world exists
 	if (!mWorld) return;
 
-	if (mHasMissilePowerup) {
-		// Create seeking missile
-		// 
-		// Calculate forward direction
-		GLVector3f direction(cos(DEG2RAD * mAngle), sin(DEG2RAD * mAngle), 0);
-		direction.normalize();
+	// Calculate direction
+	float angleRad = DEG2RAD * mAngle;
+	GLVector3f direction(cos(angleRad), sin(angleRad), 0);
+	GLVector3f bulletPos = mPosition + (direction * 4);
+	GLVector3f bulletVel = mVelocity + (direction * 30.0f);
 
-		// Create missile slightly ahead of ship
-		GLVector3f missile_pos = mPosition + (direction * 4);
-		GLVector3f missile_vel = mVelocity + direction * 30.0f;
+	bool isSeeking = mHasMissilePowerup;
+	shared_ptr<GameObject> target = isSeeking ? FindNearestAsteroid() : nullptr;
 
-		// Find nearest asteroid
-		shared_ptr<GameObject> target;
-		float closest_dist = FLT_MAX;
-		for (auto obj : mWorld->GetGameObjects()) {
-			if (obj->GetType() == GameObjectType("Asteroid")) {
-				float dist = (obj->GetPosition() - mPosition).length();
-				if (dist < closest_dist) {
-					closest_dist = dist;
-					target = obj;
-				}
-			}
-		}
+	auto bullet = make_shared<Bullet>(bulletPos, bulletVel, mAcceleration,
+		mAngle, 0, 2000, isSeeking);
 
-		// Add seeking behavior if target found
-		if (target) {
-			GLVector3f to_target = target->GetPosition() - missile_pos;
-			float distance = to_target.length();
-
-			// Only normalize if not zero vector
-			if (distance > 0) {
-				to_target /= distance;  // Manual normalization
-				missile_vel += to_target * 60.0f; // Add seeking force
-			}
-		}
-
-		// Create missile
-		shared_ptr<GameObject> missile(new Bullet(missile_pos, missile_vel,
-			mAcceleration, mAngle, 0, 2000));
-		missile->SetBoundingShape(make_shared<BoundingSphere>(missile->GetThisPtr(), 2.0f));
-		missile->SetShape(mBulletShape);
-		mWorld->AddObject(missile);
-
+	if (isSeeking && target) {
+		bullet->SetTarget(target);
 	}
-	else {
-		// Normal bullet
 
-		// Calculate bullet direction 
-		GLVector3f bullet_direction(cos(DEG2RAD * mAngle), sin(DEG2RAD * mAngle), 0);
-		bullet_direction.normalize();
-
-		// Calculate bullet position and velocity
-		GLVector3f bullet_position = mPosition + (bullet_direction * 4);
-		GLVector3f bullet_velocity = mVelocity + bullet_direction * 30.0f;
-
-		// Create bullet
-		shared_ptr<GameObject> bullet(new Bullet(bullet_position, bullet_velocity,
-			mAcceleration, mAngle, 0, 2000));
-		bullet->SetBoundingShape(make_shared<BoundingSphere>(bullet->GetThisPtr(), 2.0f));
-		bullet->SetShape(mBulletShape);
-		mWorld->AddObject(bullet);
-	}
+	// Create bullet
+	bullet->SetBoundingShape(make_shared<BoundingSphere>(bullet->GetThisPtr(), 2.0f));
+	bullet->SetShape(mBulletShape);
+	mWorld->AddObject(bullet);
 }
 
+shared_ptr<GameObject> Spaceship::FindNearestAsteroid()
+{
+	if (!mWorld) return nullptr; // Safety check
+
+	shared_ptr<GameObject> nearestAsteroid;
+	float closestDistance = FLT_MAX; // Start with maximum possible distance
+
+	// Get all game objects from the world
+	const GameObjectList& gameObjects = mWorld->GetGameObjects();
+
+	for (auto obj : gameObjects) {
+		if (obj->GetType() == GameObjectType("Asteroid")) {
+			// Calculate distance between ship and asteroid
+			float distance = (obj->GetPosition() - mPosition).length();
+
+			// Check if this is the closest so far
+			if (distance < closestDistance) {
+				closestDistance = distance;
+				nearestAsteroid = obj;
+			}
+		}
+	}
+
+	return nearestAsteroid;
+}
 
 bool Spaceship::CollisionTest(shared_ptr<GameObject> o)
 {
