@@ -3,15 +3,17 @@
 #include <string>
 #include <fstream>
 #include <algorithm>
+#include "GameUtil.h"
 
-class HighScoreSystem {
+class HighScore {
 public:
-    void Load(const std::string& filename);
-    void Save(const std::string& filename);
-    void Add(const std::string& name, int score);
-    const std::vector<std::pair<std::string, int>>& GetScores() const { return scores_; }
+    void Load(const string& filename);
+    void Save(const string& filename);
+    void Add(const string& name, int score);
+    const vector<pair<string, int>>& GetScores() const { return scores_; }
 
 private:
-    std::vector<std::pair<std::string, int>> scores_;
+    vector<pair<string, int>> scores_;
+    string filename_ = "HighScore.txt";
     static const size_t MAX_SCORES = 5;
 };

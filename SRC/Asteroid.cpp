@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include "GameUtil.h"
 #include "Asteroid.h"
 #include "BoundingShape.h"

@@ -65,7 +65,7 @@ private:
 	shared_ptr<GUILabel> mLivesLabel;
 	shared_ptr<GUILabel> mGameOverLabel;
 
-	HighScoreSystem highScores;
+	HighScore highScores;
 	vector<shared_ptr<GUILabel>> mLabels;
 
 	GameState mCurrentState;

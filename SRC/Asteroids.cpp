@@ -425,7 +425,7 @@ void Asteroids::CreateMenu()
 	mCurrentState = GameState::MENU;
 
 	// Title and menu items with their colors
-	const std::vector<std::pair<std::string, GLVector3f>> menuItems = {
+	const vector<pair<string, GLVector3f>> menuItems = {
 		{"ASTEROIDS", GLVector3f(0, 1, 0)},  // Green title
 		{"Press 'P' to start the game", GLVector3f(1, 1, 1)},
 		{"Press 'D' to change the difficulty", GLVector3f(1, 1, 1)},
@@ -609,9 +609,6 @@ void Asteroids::AddHighScore(const std::string& name, int score)
 {
 	// Add the new score
 	highScores.Add(name, score);
-
-	// Immediately save to file
-	highScores.Save("HighScore.txt");
 
 	// Refresh the display if we're currently showing highscores
 	if (mCurrentState == GameState::HIGH_SCORES) {

@@ -1,18 +1,18 @@
 #include "HighScore.h"
 
-void HighScoreSystem::Load(const std::string& filename) {
+void HighScore::Load(const string& filename) {
     scores_.clear();
-    std::ifstream file(filename);
+    ifstream file(filename);
     if (!file.is_open()) return;
 
-    std::string name;
+    string name;
     int score;
     while (file >> name >> score && scores_.size() < MAX_SCORES) {
         scores_.emplace_back(name, score);
     }
 }
 
-void HighScoreSystem::Save(const std::string& filename) {
+void HighScore::Save(const string& filename) {
     std::ofstream file(filename);
     if (!file.is_open()) return;
 
@@ -21,13 +21,20 @@ void HighScoreSystem::Save(const std::string& filename) {
     }
 }
 
-void HighScoreSystem::Add(const std::string& name, int score) {
-    scores_.emplace_back(name, score);
-    std::sort(scores_.begin(), scores_.end(),
-        [](const auto& a, const auto& b) { return b.second < a.second; });
+void HighScore::Add(const string& name, int score) {
+    // First load current scores 
+    Load(filename_);  //
 
-    if (scores_.size() > MAX_SCORES) {
-        scores_.resize(MAX_SCORES);
+    // Only add if score is high enough to make the list
+    if (scores_.size() < MAX_SCORES || score > scores_.back().second) {
+        scores_.emplace_back(name, score);
+        std::sort(scores_.begin(), scores_.end(),
+            [](const auto& a, const auto& b) { return b.second < a.second; });
+
+        if (scores_.size() > MAX_SCORES) {
+            scores_.resize(MAX_SCORES);
+        }
+        Save(filename_);
     }
-    Save("HighScore.txt");
 }
+
