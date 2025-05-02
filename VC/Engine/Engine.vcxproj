@@ -85,7 +85,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\Src\Animation.cpp" />
     <ClCompile Include="..\..\Src\AnimationManager.cpp" />
-    <ClCompile Include="..\..\SRC\BlackHoleCoin.cpp" />
     <ClCompile Include="..\..\src\GameDisplay.cpp" />
     <ClCompile Include="..\..\src\GameObject.cpp" />
     <ClCompile Include="..\..\Src\GameObjectType.cpp" />
@@ -110,7 +109,6 @@
   <ItemGroup>
     <ClInclude Include="..\..\Src\Animation.h" />
     <ClInclude Include="..\..\Src\AnimationManager.h" />
-    <ClInclude Include="..\..\SRC\BlackHoleCoin.h" />
     <ClInclude Include="..\..\Src\BoundingShape.h" />
     <ClInclude Include="..\..\src\GameDisplay.h" />
     <ClInclude Include="..\..\src\GameObject.h" />

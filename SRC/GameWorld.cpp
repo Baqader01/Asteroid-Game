@@ -168,11 +168,6 @@ void GameWorld::ClearObjects()
 	mCollisions.clear();
 }
 
-int GameWorld::GetObjectCount()
-{
-	return mGameObjects.size();
-}
-
 /** Update all objects. */
 void GameWorld::UpdateObjects(int t)
 {

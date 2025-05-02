@@ -20,18 +20,21 @@ public:
 	virtual void Rotate(float r);
 	virtual void Shoot(void);
 
+	shared_ptr<GameObject> FindNearestAsteroid();
+
 	void SetSpaceshipShape(shared_ptr<Shape> spaceship_shape) { mSpaceshipShape = spaceship_shape; }
 	void SetThrusterShape(shared_ptr<Shape> thruster_shape) { mThrusterShape = thruster_shape; }
 	void SetBulletShape(shared_ptr<Shape> bullet_shape) { mBulletShape = bullet_shape; }
 
-	void SetHeatSeeking(bool enabled) { mHeatSeekingEnabled = enabled; }
-	shared_ptr<GameObject> FindNearestAsteroid();
+	void ActivateMissilePowerup() { mHasMissilePowerup = true; mPowerupTimer = 5000; }
+	bool HasMissilePowerup() const { return mHasMissilePowerup; }
 
 	bool CollisionTest(shared_ptr<GameObject> o);
 	void OnCollision(const GameObjectList& objects);
 
 private:
-	bool mHeatSeekingEnabled = false;
+	bool mHasMissilePowerup = false;
+	int mPowerupTimer = 0;
 	float mThrust;
 
 	shared_ptr<Shape> mSpaceshipShape;

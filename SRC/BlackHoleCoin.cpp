@@ -10,7 +10,10 @@ BlackHoleCoin::BlackHoleCoin()
     mAngle = rand() % 360;
     mRotation = 0;
 
-    GetRandomPosition();
+    // Set random position 
+	mPosition.x = rand() / 2;
+	mPosition.y = rand() / 2;
+	mPosition.z = 0;
 
     // Set velocity 
     mVelocity.x = 10 * cos(DEG2RAD * mAngle);
@@ -34,7 +37,7 @@ void BlackHoleCoin::OnCollision(const GameObjectList& objects)
 {
     // Find the spaceship in the collided objects
     for (auto obj : objects) {
-        if (obj->GetType() == GameObjectType("Spaceship")){
+        if (obj->GetType() == GameObjectType("Spaceship")) {
             // Remove the blackhole object 
             if (auto world = GetWorld()) {
                 world->FlagForRemoval(GetThisPtr());

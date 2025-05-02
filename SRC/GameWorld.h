@@ -48,11 +48,9 @@ public:
 	int GetHeight() { return mHeight; }
 
 	void WrapXY(GLfloat& x, GLfloat& y);
-
-	int GetObjectCount();
-
-	GameObjectList GetGameObjects() {return mGameObjects;}
 	
+	GameObjectList GetGameObjects() {return mGameObjects;}
+
 protected:
 	void UpdateObjects(int t);
 	void UpdateCollisions(int t);

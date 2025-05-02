@@ -10,16 +10,18 @@ Bullet::Bullet()
 {
 }
 
-/** Construct a new bullet with given position, velocity, acceleration, angle, rotation and lifespan. */
-Bullet::Bullet(GLVector3f p, GLVector3f v, GLVector3f a, GLfloat h, GLfloat r, int ttl)
-	: GameObject("Bullet", p, v, a, h, r), mTimeToLive(ttl)
+Bullet::Bullet(GLVector3f p, GLVector3f v, GLVector3f a, GLfloat h, GLfloat r, int ttl, bool isSeeking)
+	: GameObject("Bullet", p, v, a, h, r), mTimeToLive(ttl), mIsSeeking(isSeeking)
 {
 }
+
+/** Construct a new bullet with given position, velocity, acceleration, angle, rotation and lifespan. */
+
 
 /** Copy constructor. */
 Bullet::Bullet(const Bullet& b)
 	: GameObject(b),
-	  mTimeToLive(b.mTimeToLive)
+	mTimeToLive(b.mTimeToLive)
 {
 }
 
@@ -42,6 +44,16 @@ void Bullet::Update(int t)
 	// If time to live is zero then remove bullet from world
 	if (mTimeToLive == 0) {
 		if (mWorld) mWorld->FlagForRemoval(GetThisPtr());
+	}
+
+	if (mIsSeeking) {
+		if (auto target = mTarget.lock()) {  // Get shared_ptr if target exists
+			GLVector3f toTarget = target->GetPosition() - mPosition;
+			float distance = toTarget.length();
+			if (distance > 0) {
+				mVelocity += (toTarget / distance) * 0.5f; // Gentle seeking
+			}
+		}
 	}
 
 }

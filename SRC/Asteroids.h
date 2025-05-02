@@ -86,6 +86,7 @@ private:
 	// Difficulty (default all enabled)
 	bool mEnableExtraLives = true;
 	bool mEnableBlackHoles = true;
+	bool mEnableWeaponPowerup = true;
 
 	void AddHighScore(const std::string& name, int score);
 
@@ -105,8 +106,6 @@ private:
 	void CreateBlackHole(int count);
 
 	// Weapon upgrade
-	bool mHasHeatSeeking = false;
-	void ActivateHeatSeeking();
 	void CreateWeaponPowerup(int count);
 
 	shared_ptr<GameObject> CreateExplosion();
