@@ -90,15 +90,16 @@ void Asteroids::Start()
 void Asteroids::StartGame() 
 {
 	DeleteLabels();
+
+	//Create the GUI
+	CreateGUI();
+
 	mCurrentState = GameState::IN_GAME;
 
 	// Only create power-ups if they're enabled
 	if (mEnableExtraLives) CreateExtraLives(2);
 	if (mEnableBlackHoles) CreateBlackHole(2);
 	if (mEnableWeaponPowerup) CreateWeaponPowerup(2);
-
-	//Create the GUI
-	CreateGUI();
 
 	// Create a spaceship and add it to the world
 	mGameWorld->AddObject(CreateSpaceship());
@@ -668,6 +669,8 @@ void Asteroids::DeleteLabels()
 	mScoreLabel.reset();
 	mLivesLabel.reset();
 	mGameOverLabel.reset();
+	mEnterNameLabel.reset();
+	mNameInputLabel.reset();
 
 	// Then clear the vector
 	glutPostRedisplay();
@@ -675,12 +678,15 @@ void Asteroids::DeleteLabels()
 
 void Asteroids::OnScoreChanged(int score)
 {
-	// Format the score message using an string-based stream
-	std::ostringstream msg_stream;
-	msg_stream << "Score: " << score;
-	// Get the score message as a string
-	std::string score_msg = msg_stream.str();
-	mScoreLabel->SetText(score_msg);
+	// Only update if label exists
+	if (mScoreLabel) {
+		// Format the score message using an string-based stream
+		std::ostringstream msg_stream;
+		msg_stream << "Score: " << score;
+		// Get the score message as a string
+		std::string score_msg = msg_stream.str();
+		mScoreLabel->SetText(score_msg);
+	}
 }
 
 void Asteroids::OnPlayerKilled(int lives_left)
@@ -690,12 +696,15 @@ void Asteroids::OnPlayerKilled(int lives_left)
 	explosion->SetRotation(mSpaceship->GetRotation());
 	mGameWorld->AddObject(explosion);
 
-	// Format the lives left message using an string-based stream
-	std::ostringstream msg_stream;
-	msg_stream << "Lives: " << lives_left;
-	// Get the lives left message as a string
-	std::string lives_msg = msg_stream.str();
-	mLivesLabel->SetText(lives_msg);
+	// Only update if label exists
+	if (mLivesLabel) {
+		// Format the lives left message using an string-based stream
+		std::ostringstream msg_stream;
+		msg_stream << "Lives: " << lives_left;
+		// Get the lives left message as a string
+		std::string lives_msg = msg_stream.str();
+		mLivesLabel->SetText(lives_msg);
+	}
 
 	if (lives_left > 0) 
 	{ 
