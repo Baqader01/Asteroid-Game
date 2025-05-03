@@ -29,6 +29,7 @@ public:
 
 	void FlagForRemoval( GameObject* ptr );
 	void FlagForRemoval( weak_ptr<GameObject> ptr );
+	void ClearAllObjects();
 
 	GameObjectList GetCollisions( shared_ptr<GameObject> ptr );
 	GameObjectList GetCollisions( GameObject* optr );
@@ -49,6 +50,11 @@ public:
 	void WrapXY(float &x, float &y);
 
 	GameObjectList GetGameObjects(){ return mGameObjects; }
+
+	// count the number of objects of a given type
+	int CountObjectsOfType(const string& type) const;
+
+	int DeleteObjectsOfType(const std::string& type);
 
 protected:
 	void UpdateObjects(int t);

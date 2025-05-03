@@ -40,6 +40,8 @@ public:
 
 	int GetScore() { return mScore; }
 
+	void ResetScore() { mScore = 0; }
+
 private:
 	int mScore;
 

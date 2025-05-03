@@ -87,21 +87,24 @@ void Asteroids::Start()
 	GameSession::Start();
 }
 
-void Asteroids::StartGame() 
+void Asteroids::StartGame()
 {
+	mCurrentState = GameState::IN_GAME;
+	mLevel = 0;
+	mScoreKeeper.ResetScore();
+	mPlayer.ResetLives();
+
+	// Clean and recreate UI
 	DeleteLabels();
 
-	//Create the GUI
 	CreateGUI();
 
-	mCurrentState = GameState::IN_GAME;
-
-	// Only create power-ups if they're enabled
+	// Create powerups if enabled
 	if (mEnableExtraLives) CreateExtraLives(2);
 	if (mEnableBlackHoles) CreateBlackHole(2);
 	if (mEnableWeaponPowerup) CreateWeaponPowerup(2);
 
-	// Create a spaceship and add it to the world
+	// Create player spaceship
 	mGameWorld->AddObject(CreateSpaceship());
 }
 
@@ -229,14 +232,17 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 {
 	if (object->GetType() == GameObjectType("Asteroid"))
 	{
-		shared_ptr<GameObject> explosion = CreateExplosion();
-		explosion->SetPosition(object->GetPosition());
-		explosion->SetRotation(object->GetRotation());
-		mGameWorld->AddObject(explosion);
-		mAsteroidCount--;
-		if (mAsteroidCount <= 0) 
-		{ 
-			SetTimer(500, START_NEXT_LEVEL); 
+		if (mCurrentState == GameState::IN_GAME)
+		{
+			shared_ptr<GameObject> explosion = CreateExplosion();
+			explosion->SetPosition(object->GetPosition());
+			explosion->SetRotation(object->GetRotation());
+			mGameWorld->AddObject(explosion);
+			mAsteroidCount--;
+			if (mAsteroidCount <= 0)
+			{
+				SetTimer(500, START_NEXT_LEVEL);
+			}
 		}
 	}
 	else if (object->GetType() == GameObjectType("ExtraLives")) {
@@ -288,10 +294,31 @@ void Asteroids::OnTimer(int value)
 		int num_asteroids = 10 + 2 * mLevel;
 		CreateAsteroids(num_asteroids);
 
-		// Only create power-ups if they're enabled
-		if (mEnableExtraLives) CreateExtraLives(2);
-		if (mEnableBlackHoles) CreateBlackHole(2);
-		if (mEnableWeaponPowerup) CreateWeaponPowerup(2);
+		// Create powerups if enabled, with maximum limits
+		const int MAX_POWERUPS = 6;
+		const int SPAWN_COUNT = 2;
+
+		// Check and create each powerup type
+		if (mEnableExtraLives) {
+			int currentExtraLives = mGameWorld->CountObjectsOfType("ExtraLives");
+			if (currentExtraLives <= MAX_POWERUPS - SPAWN_COUNT) {
+				CreateExtraLives(SPAWN_COUNT);
+			}
+		}
+
+		if (mEnableBlackHoles) {  // Changed from else-if to if for independent checks
+			int currentBlackHoles = mGameWorld->CountObjectsOfType("BlackHole");
+			if (currentBlackHoles <= MAX_POWERUPS - SPAWN_COUNT) {
+				CreateBlackHole(SPAWN_COUNT);
+			}
+		}
+
+		if (mEnableWeaponPowerup) {
+			int currentWeapons = mGameWorld->CountObjectsOfType("WeaponPowerup");
+			if (currentWeapons <= MAX_POWERUPS - SPAWN_COUNT) {
+				CreateWeaponPowerup(SPAWN_COUNT);
+			}
+		}
 	}
 
 	if (value == SHOW_GAME_OVER)

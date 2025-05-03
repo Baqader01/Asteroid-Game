@@ -99,6 +99,16 @@ void GameWorld::RemoveObject(shared_ptr<GameObject> ptr)
 	FireObjectRemoved(ptr);
 }
 
+void GameWorld::ClearAllObjects()
+{
+	// Flag everything except the spaceship for removal
+	for (auto& obj : mGameObjects) {
+		if (obj->GetType() != GameObjectType("Spaceship")) {
+			FlagForRemoval(obj);
+		}
+	}
+}
+
 /** Inform all listeners of world update. */
 void GameWorld::FireWorldUpdated()
 {
@@ -198,6 +208,35 @@ void GameWorld::UpdateCollisions(int t)
 		if (!collisions.empty()) object->OnCollision(collisions);
 	}
 }
+
+// Count the number of objects of a given type.
+int GameWorld::CountObjectsOfType(const std::string& type) const {
+	int count = 0;
+
+	// Apply gravity to nearby objects
+	for (auto obj : mGameObjects){
+		if (obj->GetType() == GameObjectType(type.c_str())) {
+			count++;
+		}
+	}
+
+	return count;
+}
+
+// Count the number of objects of a given type.
+int GameWorld::DeleteObjectsOfType(const std::string& type) {
+	int count = 0;
+
+	// Apply gravity to nearby objects
+	for (auto obj : mGameObjects) {
+		if (obj->GetType() == GameObjectType(type.c_str())) {
+			FlagForRemoval(obj);
+		}
+	}
+
+	return count;
+}
+
 
 /** Utility method to wrap positions around the world's edges. */
 void GameWorld::WrapXY(GLfloat &x, GLfloat &y)

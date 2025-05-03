@@ -45,9 +45,9 @@ public:
 		mLives++;
 	}
 
-	int GetLives() {
-		return mLives;
-	}
+	int GetLives() {return mLives;}
+
+	void ResetLives() { mLives = 3; }
 
 
 private:
