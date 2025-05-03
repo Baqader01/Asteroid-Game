@@ -9,10 +9,10 @@ const int GameWindow::ZOOM_LEVEL = 3;
 // PUBLIC INSTANCE CONSTRUCTORS ///////////////////////////////////////////////
 
 /** Construct a game window with given width, height, position and title. */
-GameWindow::GameWindow(int w, int h, int x, int y, char *t)
+GameWindow::GameWindow(int w, int h, int x, int y, char* t)
 	: GlutWindow(w, h, x, y, t),
-	  mWorld(NULL),
-	  mDisplay(NULL)
+	mWorld(NULL),
+	mDisplay(NULL)
 {
 }
 
@@ -42,8 +42,8 @@ void GameWindow::OnIdle(void)
 	GlutWindow::OnIdle();
 	// Calculate the time in milliseconds since the last update
 	static int lasttime;
-	int dt=glutGet(GLUT_ELAPSED_TIME)-lasttime;
-	lasttime=glutGet(GLUT_ELAPSED_TIME);
+	int dt = glutGet(GLUT_ELAPSED_TIME) - lasttime;
+	lasttime = glutGet(GLUT_ELAPSED_TIME);
 	// Update the world and display
 	if (mWorld) { mWorld->Update(dt); }
 	if (mDisplay) { mDisplay->Update(dt); }
@@ -61,42 +61,20 @@ void  GameWindow::OnWindowReshaped(int w, int h)
 	// Update the world and display to match
 	UpdateWorldSize();
 	UpdateDisplaySize();
-
-	// Call all registered resize callbacks
-	for (auto& callback : mResizeCallbacks) {
-		callback(w, h);
-	}
 }
-   
+
 void GameWindow::SetWorld(GameWorld* w) { mWorld = w; UpdateWorldSize(); }
 GameWorld* GameWindow::GetWorld() { return mWorld; }
 
 void GameWindow::SetDisplay(GameDisplay* d) { mDisplay = d; UpdateDisplaySize(); }
 GameDisplay* GameWindow::GetDisplay() { return mDisplay; }
 
-
-
-void GameWindow::AddResizeCallback(function<void(int, int)> callback)
-{
-	mResizeCallbacks.push_back(callback);
-}
-
-void GameWindow::ClearResizeCallbacks()
-{
-	mResizeCallbacks.clear();
-}
-
-//adding a mouse click
-//void GameWindow::OnMouseClick(int button, int state, int x, int y)
-//{
-//}
-
 void GameWindow::UpdateWorldSize()
 {
 	// Set the width and height of the world based on zoom level
 	if (mWorld) {
-		mWorld->SetWidth(glutGet(GLUT_WINDOW_WIDTH)/ZOOM_LEVEL);
-		mWorld->SetHeight(glutGet(GLUT_WINDOW_HEIGHT)/ZOOM_LEVEL);
+		mWorld->SetWidth(glutGet(GLUT_WINDOW_WIDTH) / ZOOM_LEVEL);
+		mWorld->SetHeight(glutGet(GLUT_WINDOW_HEIGHT) / ZOOM_LEVEL);
 	}
 }
 

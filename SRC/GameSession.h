@@ -23,9 +23,6 @@ protected:
 	GameDisplay* mGameDisplay;
 	GameWindow* mGameWindow;
 
-	int width = 800;
-	int height = 600;
-
 	void SetTimer(uint msecs, int value);
 };
 

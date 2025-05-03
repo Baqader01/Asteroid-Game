@@ -23,7 +23,7 @@ public:
 	void OnCollision(const GameObjectList& objects);
 
 protected:
-	bool mIsSeeking;
+	bool mIsSeeking = false;
 	weak_ptr<GameObject> mTarget;
 
 	int mTimeToLive;

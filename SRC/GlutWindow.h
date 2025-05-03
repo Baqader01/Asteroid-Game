@@ -22,11 +22,9 @@ public:
 	virtual void OnKeyReleased(uchar key, int x, int y);
 	virtual void OnSpecialKeyPressed(int key, int x, int y);
 	virtual void OnSpecialKeyReleased(int key, int x, int y);
-
-	virtual void OnMouseDrag(int x, int y);
-	virtual void OnMouseClick(int button, int state, int x, int y);
-	virtual void OnMouseMove(int x, int y);
-
+	virtual void OnMouseDragged(int x, int y);
+	virtual void OnMouseButton(int button, int state, int x, int y);
+	virtual void OnMouseMoved(int x, int y);
 	virtual void OnWindowReshaped(int w, int h);
 	virtual void OnWindowVisible(int visibility);
 
@@ -53,10 +51,10 @@ protected:
 
 	typedef list< shared_ptr<IKeyboardListener> > KeyboardListenerList;
 	KeyboardListenerList mKeyboardListeners;
-	
+
 	typedef list< shared_ptr<IMouseListener> > MouseListenerList;
 	MouseListenerList mMouseListeners;
-	
+
 	typedef list< shared_ptr<IWindowListener> > WindowListenerList;
 	WindowListenerList mWindowListeners;
 };

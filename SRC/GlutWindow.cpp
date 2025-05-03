@@ -4,14 +4,11 @@
 #include "IWindowListener.h"
 #include "GlutSession.h"
 #include "GlutWindow.h"
-#include "Asteroids.h"
-
-class Asteroids;
 
 GlutWindow::GlutWindow(int w, int h, int x, int y, char* title)
 {
 	// Initialize values for window
-	mWidth  = w;               
+	mWidth = w;
 	mHeight = h;
 	mXCoord = x;
 	mYCoord = y;
@@ -19,13 +16,13 @@ GlutWindow::GlutWindow(int w, int h, int x, int y, char* title)
 
 	// Set initial display mode to use 32-bit colour and double buffering
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
-	
+
 	// Set initial window size
 	glutInitWindowSize(mWidth, mHeight);
-	
+
 	// Set initial window position
 	glutInitWindowPosition(mXCoord, mYCoord);
-	
+
 	// Create the actual window with the given title
 	mWindowID = glutCreateWindow(title);
 }
@@ -51,14 +48,11 @@ void GlutWindow::OnTimer(int value)
 void GlutWindow::OnKeyPressed(uchar key, int x, int y)
 {
 	// If the Esc key (code 27) has been pressed stop this session (exit program)
-	if (key == 27) {
-		GlutSession::Stop();
-		return;
-	}
+	if (key == 27) { GlutSession::Stop(); }
 
-	// Normal key handling
-	for (auto& listener : mKeyboardListeners) {
-		listener->OnKeyPressed(key, x, y);
+	// Send keyboard message to all listeners
+	for (KeyboardListenerList::iterator it = mKeyboardListeners.begin(); it != mKeyboardListeners.end(); ++it) {
+		(*it)->OnKeyPressed(key, x, y);
 	}
 }
 
@@ -79,7 +73,7 @@ void GlutWindow::OnSpecialKeyPressed(int key, int x, int y)
 	for (KeyboardListenerList::iterator it = mKeyboardListeners.begin(); it != mKeyboardListeners.end(); ++it) {
 		(*it)->OnSpecialKeyPressed(key, x, y);
 	}
-}   
+}
 
 void GlutWindow::OnSpecialKeyReleased(int key, int x, int y)
 {
@@ -87,30 +81,29 @@ void GlutWindow::OnSpecialKeyReleased(int key, int x, int y)
 	for (KeyboardListenerList::iterator it = mKeyboardListeners.begin(); it != mKeyboardListeners.end(); ++it) {
 		(*it)->OnSpecialKeyReleased(key, x, y);
 	}
-}   
+}
 
-//mouse implementation
-void GlutWindow::OnMouseClick(int button, int state, int x, int y)
+void GlutWindow::OnMouseDragged(int x, int y)
 {
-	// Dispatch to all mouse listeners
-	for (auto& listener : mMouseListeners) {
-		listener->OnMouseClick(button, state, x, y);
+	// Send mouse message to all listeners
+	for (MouseListenerList::iterator it = mMouseListeners.begin(); it != mMouseListeners.end(); ++it) {
+		(*it)->OnMouseDragged(x, y);
 	}
 }
 
-void GlutWindow::OnMouseMove(int x, int y)
+void GlutWindow::OnMouseButton(int button, int state, int x, int y)
 {
-	// Dispatch to all mouse listeners
-	for (auto& listener : mMouseListeners) {
-		listener->OnMouseMove(x, y);
+	// Send mouse message to all listeners
+	for (MouseListenerList::iterator it = mMouseListeners.begin(); it != mMouseListeners.end(); ++it) {
+		(*it)->OnMouseButton(button, state, x, y);
 	}
 }
 
-void GlutWindow::OnMouseDrag(int x, int y)
+void GlutWindow::OnMouseMoved(int x, int y)
 {
-	// Dispatch to all mouse listeners
-	for (auto& listener : mMouseListeners) {
-		listener->OnMouseDrag(x, y);
+	// Send mouse message to all listeners
+	for (MouseListenerList::iterator it = mMouseListeners.begin(); it != mMouseListeners.end(); ++it) {
+		(*it)->OnMouseMoved(x, y);
 	}
 }
 
@@ -121,7 +114,7 @@ void  GlutWindow::OnWindowReshaped(int w, int h)
 		(*it)->OnWindowReshaped(w, h);
 	}
 }
-   
+
 void GlutWindow::OnWindowVisible(int visible)
 {
 	// Send window message to all listeners
@@ -132,13 +125,13 @@ void GlutWindow::OnWindowVisible(int visible)
 
 int GlutWindow::GetWindowID(void)
 {
-   return mWindowID;
+	return mWindowID;
 }
 
 void GlutWindow::SetFullscreen(bool fs)
 {
 	if (fs == mFullscreen) return;					// Return if no change required
-	
+
 	mFullscreen = fs;								// Set new window mode
 	if (mFullscreen) {								// If change to fullscreen required
 		mWidth = glutGet(GLUT_WINDOW_WIDTH);		// Save current window width
@@ -146,7 +139,8 @@ void GlutWindow::SetFullscreen(bool fs)
 		mXCoord = glutGet(GLUT_WINDOW_X);			// Save current window x-coord
 		mYCoord = glutGet(GLUT_WINDOW_Y);			// Save current window y-coord
 		glutFullScreen();							// Switch to fullscreen mode
-	} else {										// If change to windowed required
+	}
+	else {										// If change to windowed required
 		glutReshapeWindow(mWidth, mHeight);			// Restore window size
 		glutPositionWindow(mXCoord, mYCoord);			// Restore window position
 	}

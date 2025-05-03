@@ -7,6 +7,7 @@ class ExtraLives : public GameObject
 {
 public:
     ExtraLives();
+	virtual ~ExtraLives() = default;
     bool CollisionTest(shared_ptr<GameObject> o) override;
     void OnCollision(const GameObjectList& objects) override;
 };

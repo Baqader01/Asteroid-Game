@@ -23,7 +23,7 @@ void HighScore::Save(const string& filename) {
 
 void HighScore::Add(const string& name, int score) {
     // First load current scores 
-    Load(filename_);  //
+    Load(filename_);  
 
     // Only add if score is high enough to make the list
     if (scores_.size() < MAX_SCORES || score > scores_.back().second) {

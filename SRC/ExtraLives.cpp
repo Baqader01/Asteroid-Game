@@ -5,22 +5,17 @@
 ExtraLives::ExtraLives()
     : GameObject("ExtraLives")
 {
-    // Initialize movement properties 
+    // Initialise movement 
     mAngle = rand() % 360;
     mRotation = 0;
-
-    // Set random position 
     mPosition.x = rand() / 2; 
     mPosition.y = rand() / 2;
     mPosition.z = 0.0;
-
-    // Set velocity 
     mVelocity.x = 10 * cos(DEG2RAD * mAngle);
     mVelocity.y = 10 * sin(DEG2RAD * mAngle);
     mVelocity.z = 0.0;
 
 }
-
 
 bool ExtraLives::CollisionTest(shared_ptr<GameObject> o)
 {

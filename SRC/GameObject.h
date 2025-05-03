@@ -12,8 +12,8 @@ class BoundingShape;
 class GameObject : public enable_shared_from_this<GameObject>
 {
 public:
-	GameObject(char const * const type_name);
-	GameObject(char const * const type_name, GLVector3f p, GLVector3f v, GLVector3f a, GLfloat h, GLfloat r);
+	GameObject(char const* const type_name);
+	GameObject(char const* const type_name, GLVector3f p, GLVector3f v, GLVector3f a, GLfloat h, GLfloat r);
 	GameObject(const GameObject& o);
 	virtual ~GameObject(void);
 
@@ -23,22 +23,20 @@ public:
 	virtual void PreRender(void);
 	virtual void Render(void);
 	virtual void PostRender(void);
-	
+
 	virtual bool CollisionTest(shared_ptr<GameObject> o) { return false; }
 	virtual void OnCollision(const GameObjectList& objects) {}
 
 	const GameObjectType& GetType() const { return mType; }
 
-	void SetWorld(GameWorld *w) { mWorld = w; }
+	void SetWorld(GameWorld* w) { mWorld = w; }
 	GameWorld* GetWorld() { return mWorld; }
 
-	// speed
 	void SetAngle(GLfloat a) { mAngle = a; }
 	void SetRotation(GLfloat r) { mRotation = r; }
 	void SetPosition(GLVector3f p) { mPosition = p; }
 	void SetVelocity(GLVector3f v) { mVelocity = v; }
 	void SetAcceleration(GLVector3f a) { mAcceleration = a; }
-	
 
 	void AddAngle(GLfloat a) { mAngle += a; if (mAngle < 0) mAngle += 360; if (mAngle > 360) mAngle -= 360; }
 	void AddRotation(GLfloat r) { mRotation += r; }
@@ -46,27 +44,11 @@ public:
 	void AddVelocity(GLVector3f v) { mVelocity += v; }
 	void AddAcceleration(GLVector3f a) { mAcceleration += a; }
 
-	// angles
 	GLfloat GetAngle() { return mAngle; }
 	GLfloat GetRotation() { return mRotation; }
 	GLVector3f GetPosition() { return mPosition; }
 	GLVector3f GetVelocity() { return mVelocity; }
 	GLVector3f GetAcceleration() { return mAcceleration; }
-
-	float Length() const {
-		return sqrt(mPosition.x * mPosition.x +
-			mPosition.y * mPosition.y +
-			mPosition.z * mPosition.z);
-	}
-
-	void Normalize() {
-		float len = Length();
-		if (len > 0.0f) {
-			mPosition.x /= len;
-			mPosition.y /= len;
-			mPosition.z /= len;
-		}
-	}
 
 	void SetScale(float s) { mScale = s; }
 	float GetScale() { return mScale; }
@@ -77,7 +59,6 @@ public:
 	void SetBoundingShape(shared_ptr<BoundingShape> bs) { mBoundingShape = bs; }
 
 	shared_ptr<GameObject> GetThisPtr() { return shared_from_this(); }
-	shared_ptr<Sprite> GetSprite() { return mSprite; }
 
 protected:
 	GameObjectType mType;

@@ -24,8 +24,8 @@ public:
 	GUIComponent();
 	virtual ~GUIComponent();
 	virtual void Draw();
-	
-	virtual GLVector2i GetPreferredSize() { return GLVector2i(0,0); }
+
+	virtual GLVector2i GetPreferredSize() { return GLVector2i(0, 0); }
 
 	virtual void SetSize(const GLVector2i& size) { mSize = size; }
 	GLVector2i GetSize() { return mSize; }
@@ -41,21 +41,17 @@ public:
 
 	void SetBorder(const GLVector2i& border) { mBorder = border; }
 	GLVector2i GetBorder() { return mBorder; }
-	
+
 	void SetVisible(bool visible) { mVisible = visible; }
-	bool IsVisible() { return mVisible; }
-	
+	bool GetVisible() { return mVisible; }
+
 	void SetColor(const GLVector3f& color) { mColor = color; }
 	GLVector3f GetColor() { return mColor; }
-
-	void SetFontSize(int size) { mFontSize = size; }
-	int GetFontSize() { return mFontSize; }
 protected:
 	GLVector2i mSize;
 	GLVector2i mPosition;
 	GLVector2i mBorder;
 	GLVector3f mColor;
-	int mFontSize = 12;
 	bool mVisible;
 	GUIHorizontalAlignment mHorizontalAlignment;
 	GUIVerticalAlignment mVerticalAlignment;

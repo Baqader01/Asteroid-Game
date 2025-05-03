@@ -4,20 +4,15 @@
 
 WeaponPowerup::WeaponPowerup() : GameObject("WeaponPowerup")
 {
-    // Basic movement 
-    mAngle = static_cast<float>(rand() % 360);
-    mPosition = GLVector3f(rand() % 100 - 50, rand() % 100 - 50, 0);
-    mVelocity = GLVector3f(2.0f * cos(DEG2RAD * mAngle),
-        2.0f * sin(DEG2RAD * mAngle),
-        0.0f);
-}
-
-void WeaponPowerup::Update(int t)
-{
-    GameObject::Update(t);
-    // Gentle floating motion
-    mVelocity.x = 2.0f * cos(DEG2RAD * (mAngle + t / 100.0f));
-    mVelocity.y = 2.0f * sin(DEG2RAD * (mAngle + t / 100.0f));
+    // Initialise movement 
+    mAngle = rand() % 360;
+    mRotation = 0; 
+    mPosition.x = rand() / 2;
+    mPosition.y = rand() / 2;
+    mPosition.z = 0.0;
+    mVelocity.x = 10.0 * cos(DEG2RAD * mAngle);
+    mVelocity.y = 10.0 * sin(DEG2RAD * mAngle);
+    mVelocity.z = 0.0;
 }
 
 bool WeaponPowerup::CollisionTest(shared_ptr<GameObject> o)

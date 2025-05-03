@@ -172,13 +172,11 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 				mPlayerName += key;
 				mNameInputLabel->SetText(mPlayerName);
 			}
+			else if (lowerKey == 'm') { // 'M' key to return to menu
+				CreateMenu();
+			}
 			return;
-		}
 
-		switch (lowerKey) {
-		case 'm':
-			CreateMenu();
-			break;
 		}
 	}
 	else
@@ -232,17 +230,14 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 {
 	if (object->GetType() == GameObjectType("Asteroid"))
 	{
-		if (mCurrentState == GameState::IN_GAME)
+		shared_ptr<GameObject> explosion = CreateExplosion();
+		explosion->SetPosition(object->GetPosition());
+		explosion->SetRotation(object->GetRotation());
+		mGameWorld->AddObject(explosion);
+		mAsteroidCount--;
+		if (mAsteroidCount <= 0)
 		{
-			shared_ptr<GameObject> explosion = CreateExplosion();
-			explosion->SetPosition(object->GetPosition());
-			explosion->SetRotation(object->GetRotation());
-			mGameWorld->AddObject(explosion);
-			mAsteroidCount--;
-			if (mAsteroidCount <= 0)
-			{
-				SetTimer(500, START_NEXT_LEVEL);
-			}
+			SetTimer(500, START_NEXT_LEVEL);
 		}
 	}
 	else if (object->GetType() == GameObjectType("ExtraLives")) {
@@ -259,7 +254,7 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 		// Create an active black hole 
 		auto newBlackHole = make_shared<BlackHole>();
 		newBlackHole->SetScale(0.2);
-		newBlackHole->SetBoundingShape(make_shared<BoundingSphere>(newBlackHole->GetThisPtr(), 20)); // Initialize bounding shape
+		newBlackHole->SetBoundingShape(make_shared<BoundingSphere>(newBlackHole->GetThisPtr(), 20)); // Initialise bounding shape
 
 		// Set visual properties
 		Animation* anim = AnimationManager::GetInstance().GetAnimationByName("wormhole");
@@ -427,14 +422,14 @@ void Asteroids::CreateGUI()
 	mScoreLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_TOP);
 	shared_ptr<GUIComponent> score_component = static_pointer_cast<GUIComponent>(mScoreLabel);
 	mGameDisplay->GetContainer()->AddComponent(score_component, GLVector2f(0.0f, 1.0f));
-	mLabels.push_back(mScoreLabel);  // Add to unified label container
+	mLabels.push_back(mScoreLabel);  
 
 	// Create and add lives label (bottom-left)
 	mLivesLabel = make_shared<GUILabel>("Lives: 3");
 	mLivesLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_BOTTOM);
 	shared_ptr<GUIComponent> lives_component = static_pointer_cast<GUIComponent>(mLivesLabel);
 	mGameDisplay->GetContainer()->AddComponent(lives_component, GLVector2f(0.0f, 0.0f));
-	mLabels.push_back(mLivesLabel);  // Add to unified label container
+	mLabels.push_back(mLivesLabel); 
 
 	// Create and add game over label (centered, initially hidden)
 	mGameOverLabel = make_shared<GUILabel>("GAME OVER");
@@ -443,7 +438,7 @@ void Asteroids::CreateGUI()
 	mGameOverLabel->SetVisible(false);
 	shared_ptr<GUIComponent> game_over_component = static_pointer_cast<GUIComponent>(mGameOverLabel);
 	mGameDisplay->GetContainer()->AddComponent(game_over_component, GLVector2f(0.5f, 0.5f));
-	mLabels.push_back(mGameOverLabel);  // Add to unified label container
+	mLabels.push_back(mGameOverLabel);  
 }
 
 void Asteroids::CreateMenu()
@@ -638,7 +633,7 @@ void Asteroids::AddHighScore(const std::string& name, int score)
 	// Add the new score
 	highScores.Add(name, score);
 
-	// Refresh the display if we're currently showing highscores
+	// Refresh the display
 	if (mCurrentState == GameState::HIGH_SCORES) {
 		CreateHighScore(); // Rebuild the display
 	}

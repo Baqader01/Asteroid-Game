@@ -12,10 +12,6 @@ BlackHole::BlackHole()
     mVelocity = GLVector3f(0, 0, 0);
 }
 
-BlackHole::~BlackHole()
-{
-}
-
 void BlackHole::Update(int t)
 {
     GameObject::Update(t);

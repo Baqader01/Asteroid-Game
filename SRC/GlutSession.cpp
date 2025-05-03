@@ -18,7 +18,7 @@ void GlutSession::CallBackIdleFunc(void)
 	// Pass callback to window
 	if (mWindow && mIdleFunctionEnabled) { mWindow->OnIdle(); }
 }
- 
+
 void GlutSession::CallBackKeyboardFunc(uchar key, int x, int y)
 {
 	// Pass callback to window
@@ -35,30 +35,30 @@ void GlutSession::CallBackSpecialFunc(int key, int x, int y)
 {
 	// Pass callback to window
 	if (mWindow) mWindow->OnSpecialKeyPressed(key, x, y);
-}   
+}
 
 void GlutSession::CallBackSpecialUpFunc(int key, int x, int y)
 {
 	// Pass callback to window
 	if (mWindow) mWindow->OnSpecialKeyReleased(key, x, y);
-}   
+}
 
 void GlutSession::CallBackMotionFunc(int x, int y)
 {
 	// Pass callback to window
-	if (mWindow) mWindow->OnMouseDrag(x, y);
+	if (mWindow) mWindow->OnMouseDragged(x, y);
 }
 
 void GlutSession::CallBackMouseFunc(int button, int state, int x, int y)
 {
 	// Pass callback to window
-	if (mWindow) mWindow->OnMouseClick(button, state, x, y);
+	if (mWindow) mWindow->OnMouseButton(button, state, x, y);
 }
 
 void GlutSession::CallBackPassiveMotionFunc(int x, int y)
 {
 	// Pass callback to window
-	if (mWindow) mWindow->OnMouseMove(x, y);
+	if (mWindow) mWindow->OnMouseMoved(x, y);
 }
 
 void GlutSession::CallBackReshapeFunc(int w, int h)
@@ -95,11 +95,12 @@ void GlutSession::RegisterCallbacks()
 	glutMouseFunc(CallBackMouseFunc);
 	glutMotionFunc(CallBackMotionFunc);
 	glutPassiveMotionFunc(CallBackPassiveMotionFunc);
-	glutReshapeFunc(CallBackReshapeFunc); 
+	glutReshapeFunc(CallBackReshapeFunc);
 	glutVisibilityFunc(CallBackVisibilityFunc);
-	
+
 	// If window exists, initialize the idle loop
-	if (mWindow) { glutIdleFunc(CallBackIdleFunc); } else { glutIdleFunc(0); }
+	if (mWindow) { glutIdleFunc(CallBackIdleFunc); }
+	else { glutIdleFunc(0); }
 }
 
 void GlutSession::RegisterSessionTimer(uint msecs, int value)
@@ -138,7 +139,7 @@ void GlutSession::OnTimer(int key)
 	mTimerListeners.erase(i);
 }
 
-void GlutSession::Init(int &argc, char* argv[])
+void GlutSession::Init(int& argc, char* argv[])
 {
 	// Initialize GLUT
 	glutInit(&argc, argv);

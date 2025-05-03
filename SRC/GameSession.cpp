@@ -10,12 +10,9 @@
 /** Construct new game session with given command line arguments. */
 GameSession::GameSession(int argc, char *argv[])
 {
-	height = 600;
-	width = 700;
-
 	mGameWorld = new GameWorld();
-	mGameDisplay = new GameDisplay(width, height);
-	mGameWindow = new GameWindow(width, height, -1, -1, "GameWindow");
+	mGameDisplay = new GameDisplay(400, 400);
+	mGameWindow = new GameWindow(400, 400, -1, -1, "GameWindow");
 	mGameWindow->SetDisplay(mGameDisplay);
 	mGameWindow->SetWorld(mGameWorld);
 	// Set the window for this session

@@ -6,7 +6,7 @@ class BlackHole : public GameObject
 {
 public:
     BlackHole();
-    virtual ~BlackHole();
+	virtual ~BlackHole() = default;
 
     void Update(int t) override;
     bool CollisionTest(shared_ptr<GameObject> o) override;

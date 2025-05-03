@@ -6,7 +6,7 @@
 BlackHoleCoin::BlackHoleCoin()
     : GameObject("BlackHoleCoin")
 {
-    // Initialize movement properties 
+    // Initialise movement properties 
     mAngle = rand() % 360;
     mRotation = 0;
 
