@@ -89,18 +89,22 @@ https://wenrexa.itch.io/laser2020
 
 void Asteroids::StartGame()
 {
-	DeleteLabels();
 	mCurrentState = GameState::IN_GAME;
+	mLevel = 0;
+	mScoreKeeper.ResetScore();
+	mPlayer.ResetLives();
 
-	// Only create power-ups if they're enabled
+	// Clean and recreate UI
+	DeleteLabels();
+
+	CreateGUI();
+
+	// Create powerups if enabled
 	if (mEnableExtraLives) CreateExtraLives(2);
 	if (mEnableBlackHoles) CreateBlackHole(2);
 	if (mEnableWeaponPowerup) CreateWeaponPowerup(2);
 
-	//Create the GUI
-	CreateGUI();
-
-	// Create a spaceship and add it to the world
+	// Create player spaceship
 	mGameWorld->AddObject(CreateSpaceship());
 }
 
@@ -228,14 +232,17 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 {
 	if (object->GetType() == GameObjectType("Asteroid"))
 	{
-		shared_ptr<GameObject> explosion = CreateExplosion();
-		explosion->SetPosition(object->GetPosition());
-		explosion->SetRotation(object->GetRotation());
-		mGameWorld->AddObject(explosion);
-		mAsteroidCount--;
-		if (mAsteroidCount <= 0)
+		if (mCurrentState == GameState::IN_GAME)
 		{
-			SetTimer(500, START_NEXT_LEVEL);
+			shared_ptr<GameObject> explosion = CreateExplosion();
+			explosion->SetPosition(object->GetPosition());
+			explosion->SetRotation(object->GetRotation());
+			mGameWorld->AddObject(explosion);
+			mAsteroidCount--;
+			if (mAsteroidCount <= 0)
+			{
+				SetTimer(500, START_NEXT_LEVEL);
+			}
 		}
 	}
 	else if (object->GetType() == GameObjectType("ExtraLives")) {
@@ -287,10 +294,31 @@ void Asteroids::OnTimer(int value)
 		int num_asteroids = 10 + 2 * mLevel;
 		CreateAsteroids(num_asteroids);
 
-		// Only create power-ups if they're enabled
-		if (mEnableExtraLives) CreateExtraLives(2);
-		if (mEnableBlackHoles) CreateBlackHole(2);
-		if (mEnableWeaponPowerup) CreateWeaponPowerup(2);
+		// Create powerups if enabled, with maximum limits
+		const int MAX_POWERUPS = 6;
+		const int SPAWN_COUNT = 2;
+
+		// Check and create each powerup type
+		if (mEnableExtraLives) {
+			int currentExtraLives = mGameWorld->CountObjectsOfType("ExtraLives");
+			if (currentExtraLives <= MAX_POWERUPS - SPAWN_COUNT) {
+				CreateExtraLives(SPAWN_COUNT);
+			}
+		}
+
+		if (mEnableBlackHoles) {  // Changed from else-if to if for independent checks
+			int currentBlackHoles = mGameWorld->CountObjectsOfType("BlackHole");
+			if (currentBlackHoles <= MAX_POWERUPS - SPAWN_COUNT) {
+				CreateBlackHole(SPAWN_COUNT);
+			}
+		}
+
+		if (mEnableWeaponPowerup) {
+			int currentWeapons = mGameWorld->CountObjectsOfType("WeaponPowerup");
+			if (currentWeapons <= MAX_POWERUPS - SPAWN_COUNT) {
+				CreateWeaponPowerup(SPAWN_COUNT);
+			}
+		}
 	}
 
 	if (value == SHOW_GAME_OVER)
@@ -425,7 +453,7 @@ void Asteroids::CreateMenu()
 	mCurrentState = GameState::MENU;
 
 	// Title and menu items with their colors
-	const std::vector<std::pair<std::string, GLVector3f>> menuItems = {
+	const vector<pair<string, GLVector3f>> menuItems = {
 		{"ASTEROIDS", GLVector3f(0, 1, 0)},  // Green title
 		{"Press 'P' to start the game", GLVector3f(1, 1, 1)},
 		{"Press 'D' to change the difficulty", GLVector3f(1, 1, 1)},
@@ -610,9 +638,6 @@ void Asteroids::AddHighScore(const std::string& name, int score)
 	// Add the new score
 	highScores.Add(name, score);
 
-	// Immediately save to file
-	highScores.Save("HighScore.txt");
-
 	// Refresh the display if we're currently showing highscores
 	if (mCurrentState == GameState::HIGH_SCORES) {
 		CreateHighScore(); // Rebuild the display
@@ -671,6 +696,8 @@ void Asteroids::DeleteLabels()
 	mScoreLabel.reset();
 	mLivesLabel.reset();
 	mGameOverLabel.reset();
+	mEnterNameLabel.reset();
+	mNameInputLabel.reset();
 
 	// Then clear the vector
 	glutPostRedisplay();
@@ -678,12 +705,15 @@ void Asteroids::DeleteLabels()
 
 void Asteroids::OnScoreChanged(int score)
 {
-	// Format the score message using an string-based stream
-	std::ostringstream msg_stream;
-	msg_stream << "Score: " << score;
-	// Get the score message as a string
-	std::string score_msg = msg_stream.str();
-	mScoreLabel->SetText(score_msg);
+	// Only update if label exists
+	if (mScoreLabel) {
+		// Format the score message using an string-based stream
+		std::ostringstream msg_stream;
+		msg_stream << "Score: " << score;
+		// Get the score message as a string
+		std::string score_msg = msg_stream.str();
+		mScoreLabel->SetText(score_msg);
+	}
 }
 
 void Asteroids::OnPlayerKilled(int lives_left)
@@ -693,12 +723,15 @@ void Asteroids::OnPlayerKilled(int lives_left)
 	explosion->SetRotation(mSpaceship->GetRotation());
 	mGameWorld->AddObject(explosion);
 
-	// Format the lives left message using an string-based stream
-	std::ostringstream msg_stream;
-	msg_stream << "Lives: " << lives_left;
-	// Get the lives left message as a string
-	std::string lives_msg = msg_stream.str();
-	mLivesLabel->SetText(lives_msg);
+	// Only update if label exists
+	if (mLivesLabel) {
+		// Format the lives left message using an string-based stream
+		std::ostringstream msg_stream;
+		msg_stream << "Lives: " << lives_left;
+		// Get the lives left message as a string
+		std::string lives_msg = msg_stream.str();
+		mLivesLabel->SetText(lives_msg);
+	}
 
 	if (lives_left > 0)
 	{

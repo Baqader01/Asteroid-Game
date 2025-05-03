@@ -1,3 +1,4 @@
+
 #ifndef __GAMEWORLD_H__
 #define __GAMEWORLD_H__
 
@@ -22,24 +23,24 @@ public:
 	void Update(int t);
 	void Render(void);
 
-	void AddObject( shared_ptr<GameObject> ptr );
-	void RemoveObject( shared_ptr<GameObject> ptr );
-	void RemoveObject( GameObject* ptr );
+	void AddObject(shared_ptr<GameObject> ptr);
+	void RemoveObject(shared_ptr<GameObject> ptr);
+	void RemoveObject(GameObject* ptr);
 	// shared_ptr<GameObject> GetGameObject( string name );
 
-	void FlagForRemoval( weak_ptr<GameObject> ptr );
+	void FlagForRemoval(GameObject* ptr);
+	void FlagForRemoval(weak_ptr<GameObject> ptr);
+	void ClearAllObjects();
 
-	GameObjectList GetCollisions( shared_ptr<GameObject> ptr );
-	GameObjectList GetCollisions( GameObject* optr );
+	GameObjectList GetCollisions(shared_ptr<GameObject> ptr);
+	GameObjectList GetCollisions(GameObject* optr);
 
-	void ClearObjects();
-
-	void AddListener( IGameWorldListener* lptr) { mListeners.push_back(lptr); }
-	void RemoveListener( IGameWorldListener* lptr) { mListeners.remove(lptr); }
+	void AddListener(IGameWorldListener* lptr) { mListeners.push_back(lptr); }
+	void RemoveListener(IGameWorldListener* lptr) { mListeners.remove(lptr); }
 
 	void FireWorldUpdated();
-	void FireObjectAdded( shared_ptr<GameObject> ptr );
-	void FireObjectRemoved( shared_ptr<GameObject> ptr );
+	void FireObjectAdded(shared_ptr<GameObject> ptr);
+	void FireObjectRemoved(shared_ptr<GameObject> ptr);
 
 	void SetWidth(int w) { mWidth = w; }
 	int GetWidth() { return mWidth; }
@@ -47,9 +48,12 @@ public:
 	void SetHeight(int h) { mHeight = h; }
 	int GetHeight() { return mHeight; }
 
-	void WrapXY(GLfloat& x, GLfloat& y);
-	
-	GameObjectList GetGameObjects() {return mGameObjects;}
+	void WrapXY(float& x, float& y);
+
+	GameObjectList GetGameObjects() { return mGameObjects; }
+
+	// count the number of objects of a given type
+	int CountObjectsOfType(const string& type) const;
 
 protected:
 	void UpdateObjects(int t);

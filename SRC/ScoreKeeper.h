@@ -20,7 +20,7 @@ public:
 	void OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 	{
 		if (object->GetType() == GameObjectType("Asteroid")) {
- 			mScore += 10;
+			mScore += 10;
 			FireScoreChanged();
 		}
 	}
@@ -28,11 +28,6 @@ public:
 	void AddListener(shared_ptr<IScoreListener> listener)
 	{
 		mListeners.push_back(listener);
-	}	
-	
-	void RemoveListener(shared_ptr<IScoreListener> listener)
-	{
-		mListeners.remove(listener);
 	}
 
 	void FireScoreChanged()
@@ -42,9 +37,11 @@ public:
 			(*lit)->OnScoreChanged(mScore);
 		}
 	}
-	void ResetScore() { mScore = 0; }
+
 	int GetScore() { return mScore; }
-	
+
+	void ResetScore() { mScore = 0; }
+
 private:
 	int mScore;
 

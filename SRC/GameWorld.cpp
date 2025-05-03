@@ -1,6 +1,6 @@
-#include "GameWorld.h"
 #include "GameUtil.h"
 #include "GameObject.h"
+#include "GameWorld.h"
 
 // PUBLIC INSTANCE CONSTRUCTORS ///////////////////////////////////////////////
 
@@ -24,10 +24,10 @@ void GameWorld::Update(int t)
 
 	// Remove objects flagged for removal
 	WeakGameObjectList::iterator it = mGameObjectsToRemove.begin();
-	while( it != mGameObjectsToRemove.end() )
+	while (it != mGameObjectsToRemove.end())
 	{
 		RemoveObject(it->lock());
-		it = mGameObjectsToRemove.erase( it );
+		it = mGameObjectsToRemove.erase(it);
 	}
 
 	// Send update message to listeners
@@ -56,9 +56,6 @@ void GameWorld::Render(void)
 		(*it)->Render();
 		(*it)->PostRender();
 	}
-
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
 }
 
 /** Add a game object to the world. */
@@ -91,7 +88,7 @@ void GameWorld::FlagForRemoval(weak_ptr<GameObject> ptr)
 void GameWorld::RemoveObject(shared_ptr<GameObject> ptr)
 {
 	// Check if we the pointer has already been deleted
-	if(ptr.get() == nullptr) return;
+	if (ptr.get() == nullptr) return;
 	// Remove the game object from the list
 	mGameObjects.remove(ptr);
 	// Remove game object from collision map
@@ -100,6 +97,16 @@ void GameWorld::RemoveObject(shared_ptr<GameObject> ptr)
 	ptr->SetWorld(NULL);
 	// Send message to all listeners
 	FireObjectRemoved(ptr);
+}
+
+void GameWorld::ClearAllObjects()
+{
+	// Flag everything except the spaceship for removal
+	for (auto& obj : mGameObjects) {
+		if (obj->GetType() != GameObjectType("Spaceship")) {
+			FlagForRemoval(obj);
+		}
+	}
 }
 
 /** Inform all listeners of world update. */
@@ -150,30 +157,12 @@ GameObjectList GameWorld::GetCollisions(GameObject* optr)
 	return GetCollisions(shared_ptr<GameObject>(optr));
 }
 
-void GameWorld::ClearObjects()
-{
-	// Flag all objects for removal
-	for (auto& obj : mGameObjects) {
-		FlagForRemoval(obj);
-	}
-
-	// Process removals immediately
-	WeakGameObjectList::iterator it = mGameObjectsToRemove.begin();
-	while (it != mGameObjectsToRemove.end()) {
-		RemoveObject(it->lock());
-		it = mGameObjectsToRemove.erase(it);
-	}
-
-	// Clear collision map
-	mCollisions.clear();
-}
-
 /** Update all objects. */
 void GameWorld::UpdateObjects(int t)
 {
 	// Update every object in the world
 	GameObjectList::iterator it = mGameObjects.begin();
-	for(GameObjectList::iterator it = mGameObjects.begin(); it != mGameObjects.end(); ++it) 
+	for (GameObjectList::iterator it = mGameObjects.begin(); it != mGameObjects.end(); ++it)
 	{
 		(*it)->Update(t);
 	}
@@ -187,7 +176,7 @@ void GameWorld::UpdateCollisions(int t)
 
 	// Clear collisions
 	for (it1 = mCollisions.begin(); it1 != mCollisions.end(); ++it1) {
-		GameObjectList &collisions = it1->second;
+		GameObjectList& collisions = it1->second;
 		collisions.clear();
 	}
 
@@ -220,13 +209,26 @@ void GameWorld::UpdateCollisions(int t)
 	}
 }
 
+// Count the number of objects of a given type.
+int GameWorld::CountObjectsOfType(const std::string& type) const {
+	int count = 0;
+
+	// Apply gravity to nearby objects
+	for (auto obj : mGameObjects) {
+		if (obj->GetType() == GameObjectType(type.c_str())) {
+			count++;
+		}
+	}
+
+	return count;
+}
+
 /** Utility method to wrap positions around the world's edges. */
 void GameWorld::WrapXY(GLfloat& x, GLfloat& y)
 {
 	// Wrap x and y coords that are out of the bounds of the world
-	while (x >  mWidth/2)  x -= mWidth; 
-	while (y >  mHeight/2) y -= mHeight; 
-	while (x < -mWidth/2)  x += mWidth; 
-	while (y < -mHeight/2) y += mHeight; 
+	while (x > mWidth / 2)  x -= mWidth;
+	while (y > mHeight / 2) y -= mHeight;
+	while (x < -mWidth / 2)  x += mWidth;
+	while (y < -mHeight / 2) y += mHeight;
 }
-

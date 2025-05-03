@@ -31,12 +31,6 @@ public:
 		mListeners.push_back(listener);
 	}
 
-	void RemoveListener(shared_ptr<IPlayerListener> listener)
-	{
-		mListeners.remove(listener);
-	}
-
-
 	void FirePlayerKilled()
 	{
 		// Send message to all listeners
@@ -46,25 +40,20 @@ public:
 		}
 	}
 
-	void ResetLives() {
-		mLives = 3;
-	}
-
-	int GetLives() {
-		return mLives;
-	}
-
-	//adding an increase lives function
 	void IncreaseLives()
 	{
 		mLives++;
 	}
 
+	int GetLives() { return mLives; }
+
+	void ResetLives() { mLives = 3; }
+
 
 private:
 	int mLives;
 
-	typedef list< shared_ptr<IPlayerListener> > PlayerListenerList;
+	typedef std::list< shared_ptr<IPlayerListener> > PlayerListenerList;
 
 	PlayerListenerList mListeners;
 };
